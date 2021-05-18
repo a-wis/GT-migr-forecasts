@@ -7,3 +7,5 @@ Andreea Avramescu<sup>2</sup>, [Arkadiusz Wiśniowski](https://www.research.manc
 <sup>1</sup> *Department of Social Statistics, University of Manchester*
 
 <sup>2</sup> *Allianz Manchester Business School , University of Manchester*
+
+<sup>*</sup> [Corresponding author](mailto:a.wisniowski@manchester.ac.uk)
