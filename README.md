@@ -2,10 +2,10 @@
 
 ## Code and data
 
-Andreea Avramescu<sup>2</sup>, [Arkadiusz Wiśniowski](https://www.research.manchester.ac.uk/portal/a.wisniowski.html)<sup>1*</sup>
+Andreea Avramescu<sup>1</sup>, [Arkadiusz Wiśniowski](https://www.research.manchester.ac.uk/portal/a.wisniowski.html)<sup>2*</sup>
 
-<sup>1</sup> *Department of Social Statistics, University of Manchester*
+<sup>1</sup> *Alliance Manchester Business School , University of Manchester*
 
-<sup>2</sup> *Alliance Manchester Business School , University of Manchester*
+<sup>2</sup> *Department of Social Statistics, University of Manchester*
 
 <sup>*</sup> [Corresponding author](mailto:a.wisniowski@manchester.ac.uk)
