@@ -46,45 +46,47 @@ run.model.forecast <- function(model.file="Models/tsmodel02.stan",
 
 
 # GTI decomposed in three clusters ####
-forecasts_cl <- function(data=data_mig2,
-                         year.st=2012,
-                         year.data=2019){
-  
-  inits02 <- list(phi0=0, phi1=0.1, phi2=0.5, sig_a=-0.5)
-  for.sum = list(NULL)
-  fit.sum = list(NULL)
-  ll=data$GTI %>% unique()
-  
-  data.inp_im<-list(y=data %>% filter(year>year.st & year<year.data,GTI==ll[1]) %>% pull(Raw_IPS), 
-                    x=data %>% filter(year>2012,GTI==ll[1]) %>% pull(value), 
-                    NG=7, NI=year.data-2013)
-  m01.sum = run.model.forecast(model.file="Models/tsmodel01.stan", data.inp=data.inp_im, inits=inits02, trees=10, model.name="AR",GT.nam=NA) 
-  m02.sum = run.model.forecast(model.file="Models/tsmodel01rw.stan", data.inp=data.inp_im, inits=inits02, trees=10, model.name="RW",GT.nam=NA)
-  for.sum[[1]] = m01.sum$forecasts
-  fit.sum[[1]] = m01.sum$fit
-  
-  for.sum[[2]] = m02.sum$forecasts
-  fit.sum[[2]] = m02.sum$fit
-  
-  for (i in 1:length(ll)){    
-    data.inp_im<-list(y=data %>% filter(year>2012 & year<year.data, GTI==ll[1]) %>% pull(Raw_IPS), 
-                      x=data %>% filter(year>2012, GTI==ll[i]) %>% pull(value), 
-                      NG=7, NI=year.data-2013)
-#ADL models with GTI    
-    temp1.sum = run.model.forecast(model.file="Models/tsmodel02.stan", data.inp=data.inp_im, inits=inits02, trees=10, model.name="ADL",GT.nam=ll[i]) 
-#RWDL models with GTI
-    temp2.sum = run.model.forecast(model.file="Models/tsmodel02rw.stan", data.inp=data.inp_im, inits=inits02, trees=10, model.name="RWDL",GT.nam=ll[i]) 
-    for.sum[[2+i]] = temp1.sum$forecasts
-    fit.sum[[2+i]] = temp1.sum$fit
-    for.sum[[2+length(ll)+i]] = temp2.sum$forecasts
-    fit.sum[[2+length(ll)+i]] = temp2.sum$fit
-  }
- 
-  forecasts.all=bind_rows(for.sum,.id=NULL)
-  fit.all=bind_rows(fit.sum,.id=NULL)
-  return(list(forecasts=forecasts.all,fit=fit.all))
-}
+# DO NOT USE this function
+# forecasts_cl <- function(data=data_mig2,
+#                          year.st=2012,
+#                          year.data=2019){
+#   
+#   inits02 <- list(phi0=0, phi1=0.1, phi2=0.5, sig_a=-0.5)
+#   for.sum = list(NULL)
+#   fit.sum = list(NULL)
+#   ll=data$GTI %>% unique()
+#   
+#   data.inp_im<-list(y=data %>% filter(year>year.st & year<year.data,GTI==ll[1]) %>% pull(Raw_IPS), 
+#                     x=data %>% filter(year>2012,GTI==ll[1]) %>% pull(value), 
+#                     NG=7, NI=year.data-2013)
+#   m01.sum = run.model.forecast(model.file="models/tsmodel01.stan", data.inp=data.inp_im, inits=inits02, trees=10, model.name="AR",GT.nam=NA) 
+#   m02.sum = run.model.forecast(model.file="models/tsmodel01rw.stan", data.inp=data.inp_im, inits=inits02, trees=10, model.name="RW",GT.nam=NA)
+#   for.sum[[1]] = m01.sum$forecasts
+#   fit.sum[[1]] = m01.sum$fit
+#   
+#   for.sum[[2]] = m02.sum$forecasts
+#   fit.sum[[2]] = m02.sum$fit
+#   
+#   for (i in 1:length(ll)){    
+#     data.inp_im<-list(y=data %>% filter(year>2012 & year<year.data, GTI==ll[1]) %>% pull(Raw_IPS), 
+#                       x=data %>% filter(year>2012, GTI==ll[i]) %>% pull(value), 
+#                       NG=7, NI=year.data-2013)
+# #ADL models with GTI    
+#     temp1.sum = run.model.forecast(model.file="models/tsmodel02.stan", data.inp=data.inp_im, inits=inits02, trees=10, model.name="ADL",GT.nam=ll[i]) 
+# #RWDL models with GTI
+#     temp2.sum = run.model.forecast(model.file="models/tsmodel02rw.stan", data.inp=data.inp_im, inits=inits02, trees=10, model.name="RWDL",GT.nam=ll[i]) 
+#     for.sum[[2+i]] = temp1.sum$forecasts
+#     fit.sum[[2+i]] = temp1.sum$fit
+#     for.sum[[2+length(ll)+i]] = temp2.sum$forecasts
+#     fit.sum[[2+length(ll)+i]] = temp2.sum$fit
+#   }
+#  
+#   forecasts.all=bind_rows(for.sum,.id=NULL)
+#   fit.all=bind_rows(fit.sum,.id=NULL)
+#   return(list(forecasts=forecasts.all,fit=fit.all))
+# }
 
+# simulation function corrected ####
 forecasts_cl1 <- function(data=data_mig2,
                          year.st=2012,
                          year.data=2019){
@@ -139,16 +141,19 @@ forecasts_cl1 <- function(data=data_mig2,
 plot_error = function(res=results022019,
                       input=data_mig2,
                       pl_fct=7,
-                      clusters.max=3,
                       year.f=2019,
                       label="",
                       y.lab=T){
-  temp=expand_grid(model=c("AR","RW"),cluster=as.character(c(1:clusters.max,"all")))
+  clusters_name=res[[2]] %>% filter(parameter=="phi2") %>%
+    separate(GTI_lag,into = c("GTI_lag","cluster"),sep = "\\.") %>% 
+    select(cluster) %>% unique()
+  temp=expand_grid(model=c("AR","RW"),clusters_name)
   
   
   res.sum = res[[1]] %>% 
     left_join(input %>% pivot_wider(names_from="GTI",values_from="value")) %>%
-    mutate(ME=exp(Raw_IPS)-yhat,  MAPE=abs(exp(Raw_IPS)-yhat)/exp(Raw_IPS)) %>% #RMSE=sqrt((exp(Raw_IPS)-yhat)^2), = ME
+    mutate(ME=exp(Raw_IPS)-yhat,  MAPE=abs(exp(Raw_IPS)-yhat)/exp(Raw_IPS),
+           MASE=abs(exp(Raw_IPS)-yhat)/abs(exp(Raw_IPS)-exp(lagIPS))) %>% #RMSE=sqrt((exp(Raw_IPS)-yhat)^2), = ME
     filter(year==year.f) %>%
     dplyr::select(Raw_IPS,year,model, GTI_lag, ME, MAPE) 
   
@@ -157,62 +162,56 @@ plot_error = function(res=results022019,
     left_join(temp, by="model") %>%
     unite(cluster,c("cluster.x","cluster.y"),sep="",na.rm=T) %>%
     mutate(model=case_when(model=="ADL" ~ "ARX", model=="RWDL"~"RWX",TRUE ~ model) %>% as_factor(), 
-           GTI_lag=as_factor(GTI_lag),
-           cluster=case_when(cluster==GTIclust %>% filter(name=="X1.lira") %>% pull(cluster.id) ~ "currency I",
-                             cluster==GTIclust %>% filter(name=="ron.to.pound") %>% pull(cluster.id) ~ "currency II",
-                             cluster==GTIclust %>% filter(name=="jobs.uk") %>% pull(cluster.id) ~ "job|study",
-                             cluster=="all" ~ "all"))
+           GTI_lag=as_factor(GTI_lag))
   
-p= res.sum %>% 
-  mutate(MAPE=MAPE*100) %>%
-  pivot_longer(cols = ME:MAPE, names_to=c("error")) %>%
-  separate(GTI_lag,into = c("GTI_lag","cluster"),sep = "\\.") %>%
-  left_join(temp, by="model") %>%
-  unite(cluster,c("cluster.x","cluster.y"),sep="",na.rm=T) %>% 
-  # unite(model,c("model","GTI_lag"),sep=".",na.rm=T) %>%
-  mutate(model=case_when(model=="ADL" ~ "ARX", model=="RWDL"~"RWX",TRUE ~ model) %>% as_factor(), 
-         GTI_lag=replace_na(GTI_lag," "),
-         GTI_lag=GTI_lag %>% str_replace("\\_","\\[") %>% str_c(ifelse(GTI_lag!=" ","]"," ")),
-         GTI_lag=as_factor(GTI_lag),
-         cluster=case_when(cluster==GTIclust %>% filter(name=="X1.lira") %>% pull(cluster.id) ~ "currency I",
-                           cluster==GTIclust %>% filter(name=="ron.to.pound") %>% pull(cluster.id) ~ "currency II",
-                           cluster==GTIclust %>% filter(name=="jobs.uk") %>% pull(cluster.id) ~ "job|study",
-                           cluster=="all" ~ "all")) %>%#%>% fct_relevel("RW",after = 40)
-  ggplot() +
-  geom_point(aes(x=GTI_lag,y=value, colour=error, shape=error),size=3) +
-  geom_abline(intercept=0,slope=0,colour="darkgrey") +
-  geom_errorbar(data=res.phi,mapping = aes(x=as.numeric(GTI_lag)+0.2,y=mean*pl_fct, ymin=`2.5%`*pl_fct,ymax=`97.5%`*pl_fct,linetype=parameter, group=parameter), width=.2,size=0.9, alpha=0.8) +
-  geom_point(data=res.phi,mapping = aes(x=as.numeric(GTI_lag)+0.2,y=mean*pl_fct,fill=parameter, group=parameter), size=1, alpha=0.4) +
-  scale_y_continuous(sec.axis = sec_axis(~./pl_fct, name=expression("value (parameter "~phi[2]~")"))) +
-  scale_linetype_discrete(labels=list(bquote(phi[2]))) +
-  scale_fill_discrete(labels=list(bquote(phi[2]))) +
-  scale_x_discrete(labels=parse_format()) +
-  facet_grid(cluster~model,scales = "free_x",space = "free_x") +
-  theme_bw() +
-  theme(axis.text.x = element_text(size=13, angle=90, vjust=0.5),
-        axis.title = element_text(size=12),
-        legend.text = element_text(size=14),
-        legend.title = element_text(size=14),
-        legend.position = "right",
-        axis.title.y = if (y.lab==F) element_blank() else element_text(size=12)
-  ) +
-  labs(linetype="95% CI", fill="95% CI", x="GTI monthly lag",
-       y="1,000s persons (ME) or % (MAPE)",
-       title = paste0("Forecast for ",year.f,label))
-return(p)
+  p= res.sum %>% 
+    mutate(MAPE=MAPE*100) %>%
+    pivot_longer(cols = ME:MASE, names_to=c("error")) %>%
+    separate(GTI_lag,into = c("GTI_lag","cluster"),sep = "\\.") %>%
+    left_join(temp, by="model") %>%
+    unite(cluster,c("cluster.x","cluster.y"),sep="",na.rm=T) %>% 
+    # unite(model,c("model","GTI_lag"),sep=".",na.rm=T) %>%
+    mutate(model=case_when(model=="ADL" ~ "ARX", model=="RWDL"~"RWX",TRUE ~ model) %>% as_factor(), 
+           GTI_lag=replace_na(GTI_lag," "),
+           GTI_lag=GTI_lag %>% str_replace("\\_","\\[") %>% str_c(ifelse(GTI_lag!=" ","]"," ")),
+           GTI_lag=as_factor(GTI_lag)) %>%#%>% fct_relevel("RW",after = 40)
+    ggplot() +
+    geom_point(aes(x=GTI_lag,y=value, colour=error, shape=error),size=3) +
+    geom_abline(intercept=0,slope=0,colour="darkgrey") +
+    geom_errorbar(data=res.phi,mapping = aes(x=as.numeric(GTI_lag)+0.2,y=mean*pl_fct, ymin=`2.5%`*pl_fct,ymax=`97.5%`*pl_fct,linetype=parameter, group=parameter), width=.2,size=0.9, alpha=0.8) +
+    geom_point(data=res.phi,mapping = aes(x=as.numeric(GTI_lag)+0.2,y=mean*pl_fct,fill=parameter, group=parameter), size=1, alpha=0.4) +
+    scale_y_continuous(sec.axis = sec_axis(~./pl_fct, name=expression("value (parameter "~phi[2]~")"))) +
+    scale_linetype_discrete(labels=list(bquote(phi[2]))) +
+    scale_fill_discrete(labels=list(bquote(phi[2]))) +
+    scale_x_discrete(labels=parse_format()) +
+    facet_grid(cluster~model,scales = "free_x",space = "free_x") +
+    theme_bw() +
+    theme(axis.text.x = element_text(size=13, angle=90, vjust=0.5),
+          axis.title = element_text(size=12),
+          legend.text = element_text(size=14),
+          legend.title = element_text(size=14),
+          legend.position = "right",
+          axis.title.y = if (y.lab==F) element_blank() else element_text(size=12)
+    ) +
+    labs(linetype="95% CI", fill="95% CI", x="GTI monthly lag",
+         y="1,000s persons (ME) or % (MAPE)", #(MASE x 100)
+         title = paste0("Forecast for ",year.f,label))
+  return(p)
 }
 
 plot_forecast=function(res=results022019_2,
                        data=data_mig,
-                       clusters.max=3,
                        year.f=2019,
                        lags="GT[12]",
-                       clusters=c("currency~I","currency~II","job/study","all"),
+                       clusters=c("employment","education","currency","housing","control","all"),
                        v1="GTI_lag",
                        v2="model",
                        v3="cluster",
                        sc=NULL){
-  temp=expand_grid(model=c("AR","RW"),cluster=as.character(c(1:clusters.max,"all")))
+  clusters_name=res[[2]] %>% filter(parameter=="phi2") %>%
+    separate(GTI_lag,into = c("GTI_lag","cluster"),sep = "\\.") %>% 
+    select(cluster) %>% unique()
+  temp=expand_grid(model=c("AR","RW"),clusters_name)
   
   
   dat=res[[1]] %>% left_join(data) %>%
@@ -223,19 +222,17 @@ plot_forecast=function(res=results022019_2,
     mutate(model=case_when(model=="ADL" ~ "ARX", model=="RWDL"~"RWX",TRUE ~ model) %>% as_factor(), 
            GTI_lag=replace_na(GTI_lag," "),
            GTI_lag=GTI_lag %>% str_replace("\\_","\\[") %>% str_c(ifelse(GTI_lag!=" ","]"," ")),
-           GTI_lag=as_factor(GTI_lag),
-           cluster=case_when(cluster==GTIclust %>% filter(name=="X1.lira") %>% pull(cluster.id) ~ "currency I",
-                             cluster==GTIclust %>% filter(name=="ron.to.pound") %>% pull(cluster.id) ~ "currency II",
-                             cluster==GTIclust %>% filter(name=="jobs.uk") %>% pull(cluster.id) ~ "job|study",
-                             cluster=="all" ~ "all")) %>%
+           GTI_lag=as_factor(GTI_lag)) %>%
     # filter(GTI_lag=="GT_12.3"|is.na(GTI_lag)) %>%
     filter(GTI_lag%in%lags|model%in%c("AR","RW")) %>%
-    filter(cluster%in%clusters) 
+    filter(cluster%in%clusters,year<=year.f) 
   
-    p=ggplot(data=dat) +
+  p=ggplot(data=dat) +
     geom_line(aes(x = year, y = yhat),color = "#670878") + 
     geom_ribbon(aes(x = year, ymin = yhat_lower, ymax = yhat_upper), fill = "#855d8c", alpha = 0.3) + 
-    geom_point(aes(x = year, y = exp(Raw_IPS)), size = 3, color = "#0062ff") +
+    geom_point(aes(x = year, y = ifelse(year==year.f,NA,exp(Raw_IPS))), size = 3, color = "#0062ff") +
+    geom_point(aes(x = year, y = ifelse(year==year.f,exp(Raw_IPS),NA)), size = 3, color = "#0062ff", shape=17) +
+    # geom_vline(aes(xintercept = year.f-.5), linetype="dashed",colour="grey") +
     #geom_line(aes(x = year, y = exp(GTI_0)), size = 1.2, color = "red") 
     facet_grid(dat[[v1]]+dat[[v2]]~dat[[v3]],labeller = label_parsed) +
     scale_y_continuous(limits = if (is.null(sc)) NULL else c(NA,sc), oob=scales::squish) +
@@ -248,13 +245,15 @@ plot_forecast=function(res=results022019_2,
 }
 
 
-
 ## plot uncertainty ####
 plot_uncertainty= function(res=results022019_2,
                            data=data_mig,
                            year.f=2019,
                            label=""){
-  temp=expand_grid(model=c("AR","RW"),cluster=as.character(c(1:3,"all")))
+  clusters_name=res[[2]] %>% filter(parameter=="phi2") %>%
+    separate(GTI_lag,into = c("GTI_lag","cluster"),sep = "\\.") %>% 
+    select(cluster) %>% unique()
+  temp=expand_grid(model=c("AR","RW"),clusters_name)
   
   dat=res[[1]] %>% left_join(data) %>%
   separate(GTI_lag,into = c("GTI_lag","cluster"),sep = "\\.") %>%
@@ -264,11 +263,7 @@ plot_uncertainty= function(res=results022019_2,
   mutate(model=case_when(model=="ADL" ~ "ARX", model=="RWDL"~"RWX",TRUE ~ model) %>% as_factor(), 
          GTI_lag=replace_na(GTI_lag," "),
          GTI_lag=GTI_lag %>% str_replace("\\_","\\[") %>% str_c(ifelse(GTI_lag!=" ","]"," ")),
-         GTI_lag=as_factor(GTI_lag),
-         cluster=case_when(cluster==GTIclust %>% filter(name=="X1.lira") %>% pull(cluster.id) ~ "currency I",
-                           cluster==GTIclust %>% filter(name=="ron.to.pound") %>% pull(cluster.id) ~ "currency II",
-                           cluster==GTIclust %>% filter(name=="jobs.uk") %>% pull(cluster.id) ~ "job|study",
-                           cluster=="all" ~ "all")) %>%
+         GTI_lag=as_factor(GTI_lag)) %>%
   mutate(IPS_lower=exp(Raw_IPS)-IPSCI,
          IPS_upper=exp(Raw_IPS)+IPSCI,
          yhat_point=yhat,

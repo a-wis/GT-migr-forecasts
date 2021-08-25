@@ -9,16 +9,8 @@
 
 
 ##### libraries
-library(xlsx)
-library(forecast)
-library(tsoutliers)
-library(tseries)
-library(readxl)
-library(tidyverse)
-library(rstan)
-library(ggthemes)
-require(ggpubr)
-library(scales) # useful parse_format() function
+# library(tidyverse)
+
 #hue_pal()[n] useful for colours
 
 
@@ -42,7 +34,7 @@ pl.dat=  ggplot(pl.dati) +
   # geom_smooth(data=. %>% filter(cluster!="all"),aes(x=year,y=value,group=cluster,colour=cluster, fill=cluster,linetype=cluster),method="loess",size=1.5,alpha=0.3) +
   # geom_smooth(aes(x=year,y=value,group=cluster,colour=cluster, linetype=cluster),method="loess",size=2.5,alpha=0.9,se=F) +
   scale_x_continuous(expand = c(0,0.2)) +
-  scale_linetype_manual(values=c("solid","dashed", "twodash", "longdash" )) +
+  scale_linetype_manual(values=c("solid","dashed", "twodash", "longdash", "1333", "6246" )) +
   geom_line(data=pl.datiav,aes(x=year,y=cluster_mean,colour=cluster,linetype=cluster), size=2) +
     geom_point(aes(x=year,y=exp(Raw_IPS), shape="immigration (IPS)"),colour="blue",size=4.5, alpha=0.9) +
   geom_text(aes(x=2016.475,y=15,label="\"Brexit\" referendum"), angle=90,nudge_x = -0.25, colour="grey25",size=4.5,family="Palatino") +
@@ -57,7 +49,7 @@ pl.dat=  ggplot(pl.dati) +
   labs(y="value (Google Trend Index | immigration in 1,000 persons)") +
   scale_shape_discrete(name="") 
 pl.dat
-ggsave(filename = "Graphs/GTI_Mig_ts.pdf",device = "pdf",plot = pl.dat,width = 10,height=5.5)
+ggsave(filename = "graphs/GTI_Mig_ts.pdf",device = "pdf",plot = pl.dat,width = 10,height=5.5)
   
 
 
@@ -93,49 +85,56 @@ stargazer(lm.mod0,lm.mod,type="latex")
 #reading in functions
 source("code/functions_modelling_plotting.R")
 #simulation
-
+library(rstan)
 #data starting 2013: practically 2014 because of a lag
-# results022019_2=forecasts_cl(data=data_mig2,year.data=2019)
-# results022018_2=forecasts_cl(data=data_mig2,year.data=2018)
-
+results022019_30=forecasts_cl1(data=data_mig2,year.st=2012,year.data=2019)
+ save(results022019_30,file="output/results022019_30.RData")
+results022018_30=forecasts_cl1(data=data_mig2,year.st=2012,year.data=2019)
+ save(results022018_30,file="output/results022018_30.RData")
 #data starting 2012: added 0-obs for y 
-results022019_21=forecasts_cl1(data=data_mig2,year.st=2011,year.data=2019)
-results022018_21=forecasts_cl1(data=data_mig2,year.st=2011,year.data=2018)
-
+results022019_31=forecasts_cl1(data=data_mig2,year.st=2011,year.data=2019)
+save(results022019_31,file="output/results_31.RData")
+results022018_31=forecasts_cl1(data=data_mig2,year.st=2011,year.data=2018)
+save(results022018_31,file="output/results022018_31.RData")
 #data starting 2013 but using differences
-results022019_22=forecasts_cl1(data=data_mig2 %>% select(-value) %>% rename(value=GTI_diff),
+results022019_32=forecasts_cl1(data=data_mig2 %>% select(-value) %>% rename(value=GTI_diff),
                                year.st=2012,year.data=2019)
-results022018_22=forecasts_cl1(data=data_mig2 %>% select(-value) %>% rename(value=GTI_diff),
+save(results022019_32,file="output/results022019_32.RData")
+results022018_32=forecasts_cl1(data=data_mig2 %>% select(-value) %>% rename(value=GTI_diff),
                                year.st=2012,year.data=2018)
-
+save(results022018_32,results022019_32,file="output/results_32.RData")
 
 
 # making a plot of errors ####
 ## plot for 2019 errors ####
-pl2018_2=plot_error(res = results022018_2,pl_fct = 35,clusters.max = 3,year.f = 2018, label = ", sample starting 2013")
-pl2019_2=plot_error(res = results022019_2,pl_fct = 6,clusters.max = 3,year.f = 2019, label = ", sample starting 2013",y.lab=F)
-pl2018_21=plot_error(res = results022018_21,pl_fct = 35,clusters.max = 3,year.f = 2018, label = ", sample with 2012 data")
-pl2019_21=plot_error(res = results022019_21,pl_fct = 6,clusters.max = 3,year.f = 2019, label = ", sample with 2012 data",y.lab=F)
-pl2018_22=plot_error(res = results022018_22,pl_fct = 35,clusters.max = 3,year.f = 2018, label = ", differences of the GTI used as predictor")
-pl2019_22=plot_error(res = results022019_22,pl_fct = 6,clusters.max = 3,year.f = 2019, label = ", differences of the GTI used as predictor",y.lab=F)
+pl2018_3=plot_error(res = results022018_30,pl_fct = 35,year.f = 2018, label = ", sample starting 2013")
+pl2019_3=plot_error(res = results022019_30,pl_fct = 6,year.f = 2019, label = ", sample starting 2013",y.lab=F)
+pl2018_31=plot_error(res = results022018_31,pl_fct = 35,year.f = 2018, label = ", sample with 2012 data")
+pl2019_31=plot_error(res = results022019_31,pl_fct = 6,year.f = 2019, label = ", sample with 2012 data",y.lab=F)
+pl2018_32=plot_error(res = results022018_32,pl_fct = 35,year.f = 2018, label = ", differences of the GTI used as predictor")
+pl2019_32=plot_error(res = results022019_32,pl_fct = 6,year.f = 2019, label = ", differences of the GTI used as predictor",y.lab=F)
 pl2018_2
 pl2019_2
 
-g=ggarrange(plotlist=list(pl2018_2,pl2019_2), ncol=1,nrow=2, labels = NULL, legend ="right", common.legend = TRUE)
-g=ggarrange(plotlist=list(pl2018_21,pl2019_21,pl2018_22,pl2019_22), ncol=2,nrow=2, labels = NULL, legend ="bottom", common.legend = TRUE, widths=c(1.05,1))
-g1=ggarrange(plotlist=list(pl2018_2,pl2019_2,pl2018_21,pl2019_21,pl2018_22,pl2019_22), ncol=2,nrow=3, labels = NULL, legend ="bottom", common.legend = TRUE, widths=c(1.05,1))
+g=ggarrange(plotlist=list(pl2018_3,pl2019_3), ncol=1,nrow=2, labels = NULL, legend ="right", common.legend = TRUE)
+g1=ggarrange(plotlist=list(pl2018_31,pl2019_31,pl2018_32,pl2019_32), ncol=2,nrow=2, labels = NULL, legend ="bottom", common.legend = TRUE, widths=c(1.05,1))
+g2=ggarrange(plotlist=list(pl2018_3,pl2019_3,pl2018_31,pl2019_31,pl2018_32,pl2019_32), ncol=2,nrow=3, labels = NULL, legend ="bottom", common.legend = TRUE, widths=c(1.05,1))
 
-ggexport(g,filename= paste0("Graphs/results_err_rob.pdf"),
+ggexport(g1,filename= paste0("graphs/results_err_rob.pdf"),
          width=13,height = 13)
-ggexport(g1,filename= paste0("Graphs/results_err_rob1.pdf"),
+ggexport(g2,filename= paste0("graphs/results_err_rob1.pdf"),
          width=13,height = 16)
-ggexport(g,filename= paste0("Graphs/results_err.pdf"),width=9,height = 10)
+ggexport(g,filename= paste0("graphs/results_err.pdf"),width=9,height = 10)
+
+# show MAPE
+pl2018_3$data %>% filter(cluster=="employment",error=="MAPE", model=="ARX") %>% distinct() %>% View
+
 
 
 #plotting the actual forecasts
 
-pl.2018=plot_forecast(res = results022018_2,lags = c("GT[4]","GT[12]"), year.f=2018, clusters=c("currency~I","job/study"),v1="GTI_lag",v2="model",v3="cluster",sc=150)
-pl.2019_21=plot_forecast(res = results022019_21,year.f=2019)
+pl.2018=plot_forecast(res = results022018_30,lags = c("GT[4]","GT[12]"), year.f=2018, clusters=c("currency","employment"),v1="GTI_lag",v2="model",v3="cluster",sc=150)
+pl.2019=plot_forecast(res = results022019_30,year.f=2019)
 
 pl.2018
 pl.2019
@@ -146,8 +145,8 @@ ggsave(filename = "Graphs/GTI_forcast2019.pdf",device = "pdf",plot = pl.2019,wid
 
 ##########
 ## assesssing uncertainty ####
-pl.unc.2018= plot_uncertainty(res = results022018_2,year.f = 2018, label = ", sample starting 2013")
-pl.unc.2019= plot_uncertainty(res = results022019_2,year.f = 2019, label = ", sample starting 2013")
-g=ggarrange(plotlist=list(pl.unc.2018,pl.unc.2019), ncol=1,nrow=2, labels = NULL, legend ="bottom", common.legend = TRUE)
-ggexport(g,filename= paste0("Graphs/unc2013.pdf"),
+pl.unc.2018= plot_uncertainty(res = results022018_30,year.f = 2018, label = ", sample starting 2013")
+pl.unc.2019= plot_uncertainty(res = results022019_30,year.f = 2019, label = ", sample starting 2013")
+g3=ggarrange(plotlist=list(pl.unc.2018,pl.unc.2019), ncol=1,nrow=2, labels = NULL, legend ="bottom", common.legend = TRUE)
+ggexport(g3,filename= paste0("graphs/unc2013.pdf"),
          width=10,height = 11)

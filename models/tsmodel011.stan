@@ -12,7 +12,7 @@ data {
 // accepts two parameters 'mu' and 'sigma'.
 parameters {
   real phi0;
-  real<lower=0, upper=1> phi1;
+  real<lower=-1, upper=1> phi1;
   real sig_a;
   // real sig_b;
   vector[NI] l_sigma; 

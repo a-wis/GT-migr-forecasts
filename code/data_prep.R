@@ -1,91 +1,110 @@
 ### AW coding the trend in GTI detrended ###
 ############################################
 ### created: 10/12/2020
-### modified: 18/05/2021
+### modified: 05/06/2021
 ############################################
 ### Arkadiusz Wisniowski
 ############################################
-
+rm(list=ls())
 
 ##### libraries
-library(xlsx)
-library(forecast)
-library(tsoutliers)
-library(tseries)
-library(readxl)
 library(tidyverse)
+library(xlsx)
+library(readr)
+library(zoo)
+# library(forecast)
+# library(tsoutliers)
+# library(tseries)
+# library(readxl)
+# library(readr)
 library(ggthemes)
 require(ggpubr)
 library(scales) # useful parse_format() function
 #hue_pal()[n] useful for colours
 
 # Import data on GTI ####
-data <- read.xlsx("data/GT.xlsx", sheetName = "Sheet1")
-#Separate the Month column into year and month
-data$year <- format(data$Date, format = "%Y")
-data$month <- format(data$Date, format = "%m")
-#Format the data as numeric
-data$year <- as.numeric(data$year)
-data$month <- as.numeric(data$month)
-#Outliers 
-#Test if data are not stationary
-adf.test(data$AVERAGE)
-
-#Remove outliers in the AVERAGE column
-tsoutliers(data$AVERAGE, iterate = 5, lambda = NULL)
-data$AVERAGE[54] <- 45.92105
+data <- read_csv("data/GT_data.csv")
+data = data %>%
+  mutate(Date=as.yearmon(Date),
+         year=format(Date, format = "%Y") %>% as.numeric(), 
+         month=format(Date, format="%m") %>% as.numeric()) %>%
+  rename_all(list(~
+    str_replace_all(.,
+                    pattern = " ",
+                    replacement = "."))) %>%
+  mutate(GTI=rowMeans(select(.,evolutie.curs.lira.sterlina:education.uk))) %>%
+  filter(year<2020) %>%
+  select(Date,year, month, everything(.))
+  
+cluster_id = read_csv("data/GT_cluster_dictionary.csv") %>%
+  mutate(keyword=str_replace_all(keyword,
+                                 pattern = " ",
+                                 replacement = ".")) %>%
+  rename(name=keyword)
 
 #all GT variables in detail ####
 GTIdetail=data %>% 
-  rename(GTI=AVERAGE) %>%
   group_by(year) %>%
-  summarise_at(vars(GTI:leu.lira), mean) %>%
-  ungroup() %>%
-  select(-ambasada.angliei,-British.embassy,-transport.anglia,-visit.uk)
+  summarise_at(vars(evolutie.curs.lira.sterlina:GTI), mean) %>%
+  ungroup() 
 
 #clustering GTI data annually averaged ####
 #clustering using raw GTI data
 x1=GTIdetail %>% 
-  select(-GTI) %>% 
-  pivot_longer(cols = 2:35) %>% 
+  select(-GTI,-c(50:60)) %>% 
+  pivot_longer(cols = 2:49) %>% 
   pivot_wider(names_from = year, values_from=value) %>% 
   column_to_rownames(var = "name")  %>% 
   as.matrix()
 #testing scree and silhouette for optimum number of clusters
-require(factoextra)
-fviz_nbclust(x1, kmeans, method='silhouette',iter.max=25,nstart=100)
+# require(factoextra)
+# fviz_nbclust(x1, kmeans, method='silhouette',iter.max=50,nstart=100)
 
-GTIkm=kmeans(x1,centers = 3,iter.max=25,nstart=100)
+# GTIkm=kmeans(x1,centers = 4,iter.max=50,nstart=100)
 # summary(GTIkm)
-GTIkm=as.data.frame(GTIkm$cluster) %>% 
-  rownames_to_column(var = "name") %>% 
-  rename(cluster=`GTIkm$cluster`)
+# GTIkm=as.data.frame(GTIkm$cluster) %>% 
+  # rownames_to_column(var = "name") %>% 
+  # rename(cluster=`GTIkm$cluster`)
+
+
 #GTIclust is a key between cluster.id and cluster (name)
 GTIclust = GTIdetail %>% 
   # select(-GTI) %>% 
-  pivot_longer(cols = 2:36) %>% 
+  pivot_longer(cols = 2:60) %>% 
   pivot_wider(names_from = year, values_from=value) %>% 
-  left_join(GTIkm) %>%
-  rename(cluster.id=cluster) %>%
-  mutate(cluster=case_when(cluster.id==GTIclust %>% filter(name=="X1.lira") %>% pull(cluster.id) ~ "currency I",
-                           cluster.id==GTIclust %>% filter(name=="ron.to.pound") %>% pull(cluster.id) ~ "currency II",
-                           cluster.id==GTIclust %>% filter(name=="jobs.uk") %>% pull(cluster.id) ~ "job|study",
-                           is.na(cluster.id) ~ "all")) 
+  left_join(cluster_id) %>%
+  # rename(cluster_s=cluster) %>%
+  # left_join(GTIkm) %>%
+  mutate(cluster=case_when(
+    is.na(cluster) ~ "all",
+    TRUE ~ cluster)
+    ) #cluster=as.factor(cluster)
 # the above mutate() is the "original" coding (_2), in the new runs (_21, _22) clusters change, old 1 = new 3, and old 3 = new 1.
 
 
 #plotting clustered GTI values
-GTIclust %>% pivot_longer(cols = `2012`:`2019`,names_to="year") %>% 
+GTIclust %>% 
+  pivot_longer(cols = `2012`:`2019`,names_to="year") %>% 
+  filter(cluster=="employment") %>%
   ggplot() + 
   geom_line(aes(x=year,y=value,group=name,colour=cluster),size=1,alpha=0.5) +
   # facet_wrap(year~.,nrow = 4) +
   geom_smooth(aes(x=year,y=value,group=cluster,colour=cluster, fill=cluster),method="loess",size=1.5) +
   theme_bw()
 
+# GTIclust %>% pivot_longer(cols = `2012`:`2019`,names_to="year") %>% mutate(year=as.numeric(year)) %>%
+#   select(-cluster) %>%
+#   group_by(cluster_s,year) %>%
+#   summarise(cluster_mean=mean(value)) %>% ungroup() %>%
+#   ggplot() + 
+#   geom_line(aes(x=year,y=cluster_mean,colour=cluster_s),size=1,alpha=0.5) + 
+#   theme_bw()
+
+
+
 # GTI averages with monthly windows
 GTIm_av=data %>% 
-  select(Date, AVERAGE,year, month) %>%
-  rename(GTI=AVERAGE) %>%
+  select(Date, GTI,year, month) %>%
   mutate(GTI_0=(GTI), 
          GTI_1=lag(GTI), 
          GTI_2=lag(GTI,n = 2), 
@@ -105,8 +124,7 @@ GTIm_av=data %>%
   ungroup()
 
 GTIm=data %>% 
-  rename(GTI=AVERAGE) %>%
-  pivot_longer(cols = GTI:leu.lira,names_to = "GTname") %>%
+  pivot_longer(cols = evolutie.curs.lira.sterlina:GTI,names_to = "GTname") %>%
   group_by(GTname) %>%
   mutate(GT_0=(value), 
          GT_1=lag(value), 
@@ -125,14 +143,14 @@ GTIm=data %>%
   ungroup() %>%
   # filter(GTname!="GTI") %>%
   select(-value) %>%
-  group_by(Date, year, GTname) %>%
+  group_by(year, GTname) %>%
   summarise_at(vars(GT_0:GT_12), mean) %>%
   ungroup() %>%
-  left_join(GTIkm,by = c("GTname"="name")) %>%
+  left_join(cluster_id,by = c("GTname"="name")) %>%
   mutate(cluster = cluster %>% replace_na("all") %>%
-           as_factor() %>% fct_relevel("1","2","3","all")) %>%
+           as_factor() ) %>%
   select(-GTname) %>%
-  group_by(cluster,year, Date) %>%
+  group_by(cluster,year) %>%
   summarise_at(vars(GT_0:GT_12), mean) %>%
   ungroup() %>%  
   pivot_wider(names_from = "cluster", 
@@ -157,11 +175,12 @@ data_mig = data_an %>%
 data_mig2 = data_an %>%
   mutate(year=lubridate::year(Date),
          IPSSE=IPSCI/qnorm(0.975),
-         IPSSEpc=IPSSE/Raw_IPS) %>%
-  select(Date,year, Raw_IPS,IPSSE,IPSSEpc) %>%
+         IPSSEpc=IPSSE/Raw_IPS,
+         lagIPS=dplyr::lag(log(Raw_IPS))) %>%
+  select(Date,year, Raw_IPS,lagIPS,IPSSE,IPSSEpc) %>%
   left_join(GTIm) %>%
-  mutate_at(vars(Raw_IPS,GT_0.1:GT_12.all),log) %>%
-  pivot_longer(cols = GT_0.1:GT_12.all,names_to="GTI") %>%
+  mutate_at(vars(Raw_IPS,GT_0.currency:GT_12.employment),log) %>%
+  pivot_longer(cols = GT_0.currency:GT_12.employment,names_to="GTI") %>%
   group_by(GTI) %>% 
   mutate(GTI_diff=value-lag(value)) %>% 
   ungroup()
@@ -173,18 +192,20 @@ data_mig2 = data_an %>%
 #Figure 2: GTI lags ####
 pl.lag=data_mig2 %>% 
   separate(col = GTI,into=c("GTI","lag","cluster"),sep="[\\_.]") %>%
-  mutate(lag=as_factor(lag), cluster=as_factor(cluster)) %>%
-  rename(cluster.id=cluster) %>%
-  mutate(cluster=case_when(cluster.id==GTIclust %>% filter(name=="X1.lira") %>% pull(cluster.id) ~ "currency I",
-                           cluster.id==GTIclust %>% filter(name=="ron.to.pound") %>% pull(cluster.id) ~ "currency II",
-                           cluster.id==GTIclust %>% filter(name=="jobs.uk") %>% pull(cluster.id) ~ "job|study",
-                           cluster.id=="all" ~ "all")) %>%
+  mutate(lag=as_factor(lag), cluster=cluster %>% 
+           as_factor() %>%
+           fct_relevel("all","currency","education","employment","housing","control")) %>%
+  # rename(cluster.id=cluster) %>%
+  # mutate(cluster=case_when(cluster.id==GTIclust %>% filter(name=="X1.lira") %>% pull(cluster.id) ~ "currency I",
+  #                          cluster.id==GTIclust %>% filter(name=="ron.to.pound") %>% pull(cluster.id) ~ "currency II",
+  #                          cluster.id==GTIclust %>% filter(name=="jobs.uk") %>% pull(cluster.id) ~ "job|study",
+  #                          cluster.id=="all" ~ "all")) %>%
   filter(year>2012) %>%
   ggplot() +
   geom_line(aes(x = year, y = exp(value), colour=lag,group=(lag)), size = 1) +
   scale_color_viridis_d(option="inferno",end = 0.9) +
   geom_point(aes(x = year, y = exp(Raw_IPS)), size = 4, color = "blue") + 
-  scale_linetype_manual(values=c("solid","dashed", "twodash", "longdash" )) +
+  scale_linetype_manual(values=c("solid","dashed", "twodash", "longdash","1333", "6246" )) +
   facet_grid(.~cluster) +
   theme_bw() +
   theme(axis.text.x = element_text(size=13),
@@ -197,18 +218,13 @@ pl.lag=data_mig2 %>%
   ) +
   labs(y="value (Google Trend Index | immigration in 1,000 persons)")
 pl.lag  
-ggsave(filename = "Graphs/GTI_lags.pdf",device = "pdf",plot = pl.lag,width = 12,height=5)
+ggsave(filename = "graphs/GTI_lags.pdf",device = "pdf",plot = pl.lag,width = 12, height=5)
 
 
 
-#PAPER table with key words####
-GTIclust %>% 
-  mutate(keyword=str_replace_all(name,"[.]"," ")) %>%
-  select(-cluster.id,-name) %>%
-  relocate(keyword,before=1) %>%
-  knitr::kable(format="latex", digits=1)
 
-#PAPER table with IPS####
+
+#PAPER table A1 with IPS####
 data_an %>% mutate(year=lubridate::year(Date),
                    SE=IPSCI/qnorm(0.975),
                    `SE/IPS %`=SE/Raw_IPS*100) %>%
@@ -216,3 +232,55 @@ data_an %>% mutate(year=lubridate::year(Date),
   rename(IPS=Raw_IPS,`95% CI`=IPSCI) %>%
   # relocate(keyword,before=1) %>%
   knitr::kable(format="latex", digits=c(0,1,1,1,1))
+
+
+# correlation
+corr=GTIdetail %>%
+  left_join(data_mig) %>%
+  filter(year>2012) %>%
+  mutate(IPS=exp(Raw_IPS)) %>%
+  select(-year,-IPSSE,-IPSSEpc,-IPSCI,-Date) %>% 
+  cor()
+write.table(corr[,c(60,74)],file="clipboard")
+foo=corr[,c(60,74)]
+write.table(abs(foo/sqrt(1-foo^2)*sqrt(5))>qt(0.95,df = 5),file="clipboard")
+
+corr1=as.data.frame(corr[,74]) %>%
+  rename(rho=`corr[, 74]`) %>%
+  rownames_to_column("keyword") %>%
+  mutate(keyword=str_replace_all(keyword,"[.]"," "))
+  
+
+corr2=data_mig2 %>%
+  select(-IPSSE, -IPSSEpc,-Date,-lagIPS,-GTI_diff) %>%
+  mutate(IPS=exp(Raw_IPS)) %>%
+  filter(year>2012) %>%
+  pivot_wider(names_from = GTI, values_from=value) %>% 
+  select(-year) %>%
+  cor()
+write.table(corr2[,c(1,2)],file="clipboard")
+
+#value of rho above which it is significant at 0.05
+qt(0.95,df = 5)/sqrt(5+qt(0.95,df = 5)^2)
+
+#PAPER table A2 with key words####
+GTIclust %>% 
+  mutate(keyword=str_replace_all(name,"[.]"," ")) %>%
+  select(-name) %>%
+  left_join(corr1) %>%
+  relocate(keyword,before=1) %>%
+  knitr::kable(format="latex", digits=c(NA,1,1,1,1,1,1,1,1,NA,2))
+
+
+#correlation for clusters and lags
+corr3=as.data.frame(corr2[-c(1,2),1]) %>%
+  rename(rho=`corr2[-c(1, 2), 1]`) %>%
+  rownames_to_column("GTI") %>%
+  separate(GTI,into = c("lag","cluster"), sep = "\\.") %>%
+  mutate(lag=str_remove(lag,"GT_")) %>% 
+  pivot_wider(names_from = cluster, values_from=rho) %>%
+  relocate(lag,employment, education, currency, housing, control)
+
+corr3 %>% knitr::kable(format="latex", digits=2)
+  
+  
