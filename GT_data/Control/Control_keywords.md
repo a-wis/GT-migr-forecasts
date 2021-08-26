@@ -1,0 +1,12 @@
+```
+flower
+horse
+tree
+rocket
+money
+sport
+Greece
+Spain
+mother
+grass
+```
