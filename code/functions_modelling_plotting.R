@@ -166,7 +166,7 @@ plot_error = function(res=results022019,
   
   p= res.sum %>% 
     mutate(MAPE=MAPE*100) %>%
-    pivot_longer(cols = ME:MASE, names_to=c("error")) %>%
+    pivot_longer(cols = ME:MAPE, names_to=c("error")) %>%
     separate(GTI_lag,into = c("GTI_lag","cluster"),sep = "\\.") %>%
     left_join(temp, by="model") %>%
     unite(cluster,c("cluster.x","cluster.y"),sep="",na.rm=T) %>% 

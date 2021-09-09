@@ -1,7 +1,8 @@
-### AW coding the trend in GTI detrended ###
+### Data reading and preps for analysis  ###
+### plots and tables
 ############################################
 ### created: 10/12/2020
-### modified: 05/06/2021
+### modified: 09/09/2021
 ############################################
 ### Arkadiusz Wisniowski
 ############################################
@@ -83,6 +84,7 @@ GTIclust = GTIdetail %>%
 
 
 #plotting clustered GTI values
+#for an example cluster
 GTIclust %>% 
   pivot_longer(cols = `2012`:`2019`,names_to="year") %>% 
   filter(cluster=="employment") %>%
@@ -218,7 +220,7 @@ pl.lag=data_mig2 %>%
   ) +
   labs(y="value (Google Trend Index | immigration in 1,000 persons)")
 pl.lag  
-ggsave(filename = "graphs/GTI_lags.pdf",device = "pdf",plot = pl.lag,width = 12, height=5)
+#ggsave(filename = "graphs/GTI_lags.pdf",device = "pdf",plot = pl.lag,width = 12, height=5)
 
 
 
@@ -234,7 +236,9 @@ data_an %>% mutate(year=lubridate::year(Date),
   knitr::kable(format="latex", digits=c(0,1,1,1,1))
 
 
-# correlation
+# correlation #####
+
+#correlation matrix for IPS and keyword values
 corr=GTIdetail %>%
   left_join(data_mig) %>%
   filter(year>2012) %>%
@@ -242,15 +246,18 @@ corr=GTIdetail %>%
   select(-year,-IPSSE,-IPSSEpc,-IPSCI,-Date) %>% 
   cor()
 write.table(corr[,c(60,74)],file="clipboard")
+# correlation with Raw IPS and logIPS
 foo=corr[,c(60,74)]
+#t-test for correlation at 0.05 level
 write.table(abs(foo/sqrt(1-foo^2)*sqrt(5))>qt(0.95,df = 5),file="clipboard")
 
+#logIPS as used in the models
 corr1=as.data.frame(corr[,74]) %>%
   rename(rho=`corr[, 74]`) %>%
   rownames_to_column("keyword") %>%
   mutate(keyword=str_replace_all(keyword,"[.]"," "))
   
-
+#correlation matrix between iPS and GTIs 
 corr2=data_mig2 %>%
   select(-IPSSE, -IPSSEpc,-Date,-lagIPS,-GTI_diff) %>%
   mutate(IPS=exp(Raw_IPS)) %>%
@@ -281,6 +288,7 @@ corr3=as.data.frame(corr2[-c(1,2),1]) %>%
   pivot_wider(names_from = cluster, values_from=rho) %>%
   relocate(lag,employment, education, currency, housing, control)
 
+#Table A3
 corr3 %>% knitr::kable(format="latex", digits=2)
   
   

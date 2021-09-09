@@ -1,8 +1,10 @@
 ############################################
-### AW coding the trend in GTI detrended ###
+### analysis of the GTI data and migration #
+### analysis of forecasts
+### plotting and tables with results
 ############################################
 ### created: 10/12/2020
-### modified: 18/05/2021
+### modified: 09/09/2021
 ############################################
 ### Arkadiusz Wisniowski
 ############################################
@@ -10,6 +12,7 @@
 
 ##### libraries
 # library(tidyverse)
+library(stargazer)
 
 #hue_pal()[n] useful for colours
 
@@ -73,11 +76,11 @@ ggsave(filename = "Graphs/IPS_rse.pdf",device = "pdf",plot = pl.ipsse,width = 8,
 
 #modelling relative standard errors ####
 # lm(formula = log(IPSSEpc/(1-IPSSEpc)) ~ (Raw_IPS), data = data_mig %>% filter(year>2000)) %>% summary()
-lm.mod=lm(formula = log(IPSSEpc/(1-IPSSEpc)) ~ (Raw_IPS)-1, data = data_mig %>% filter(year>2000)) 
+lm.mod=lm(formula = log(IPSSEpc/(1-IPSSEpc)) ~ (Raw_IPS)-1, data = data_mig %>% xxxxx) 
 lm.mod0=lm(formula = log(IPSSEpc/(1-IPSSEpc)) ~ (Raw_IPS), data = data_mig %>% filter(year>2000)) 
 
-# table A3 ####
-stargazer(lm.mod0,lm.mod,type="latex")
+# table A4 ####
+stargazer(lm.mod0,lm.mod,type="latex", style = "default",report = "vcsp")
 
 
 
@@ -91,7 +94,7 @@ results022019_30=forecasts_cl1(data=data_mig2,year.st=2012,year.data=2019)
  save(results022019_30,file="output/results022019_30.RData")
 results022018_30=forecasts_cl1(data=data_mig2,year.st=2012,year.data=2019)
  save(results022018_30,file="output/results022018_30.RData")
-#data starting 2012: added 0-obs for y 
+#data starting 2012: added 0-timepoint-obs for y 
 results022019_31=forecasts_cl1(data=data_mig2,year.st=2011,year.data=2019)
 save(results022019_31,file="output/results_31.RData")
 results022018_31=forecasts_cl1(data=data_mig2,year.st=2011,year.data=2018)
@@ -102,7 +105,8 @@ results022019_32=forecasts_cl1(data=data_mig2 %>% select(-value) %>% rename(valu
 save(results022019_32,file="output/results022019_32.RData")
 results022018_32=forecasts_cl1(data=data_mig2 %>% select(-value) %>% rename(value=GTI_diff),
                                year.st=2012,year.data=2018)
-save(results022018_32,results022019_32,file="output/results_32.RData")
+save(results022018_32, results022019_32,
+     file="output/results_32.RData")
 
 
 # making a plot of errors ####
@@ -120,10 +124,12 @@ g=ggarrange(plotlist=list(pl2018_3,pl2019_3), ncol=1,nrow=2, labels = NULL, lege
 g1=ggarrange(plotlist=list(pl2018_31,pl2019_31,pl2018_32,pl2019_32), ncol=2,nrow=2, labels = NULL, legend ="bottom", common.legend = TRUE, widths=c(1.05,1))
 g2=ggarrange(plotlist=list(pl2018_3,pl2019_3,pl2018_31,pl2019_31,pl2018_32,pl2019_32), ncol=2,nrow=3, labels = NULL, legend ="bottom", common.legend = TRUE, widths=c(1.05,1))
 
+#Fig A2
 ggexport(g1,filename= paste0("graphs/results_err_rob.pdf"),
          width=13,height = 13)
 ggexport(g2,filename= paste0("graphs/results_err_rob1.pdf"),
          width=13,height = 16)
+#Fig 3
 ggexport(g,filename= paste0("graphs/results_err.pdf"),width=9,height = 10)
 
 # show MAPE
@@ -138,6 +144,7 @@ pl.2019=plot_forecast(res = results022019_30,year.f=2019)
 
 pl.2018
 pl.2019
+#Figs A3 and A4
 ggsave(filename = "Graphs/GTI_forcast2018.pdf",device = "pdf",plot = pl.2018,width = 6,height=7)
 ggsave(filename = "Graphs/GTI_forcast2019.pdf",device = "pdf",plot = pl.2019,width = 12,height=7)
 
