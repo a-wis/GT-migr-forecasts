@@ -1,6 +1,12 @@
 ### IPS migration forecasting using GTI
 ### using 12 lagged versions of GTI
-###
+############################################
+############################################
+## created: 09/12/2020
+## modified: 09/09/2021
+############################################
+## Arkadiusz Wisniowski
+############################################
 
 ##### function for running a model ####
 run.model.forecast <- function(model.file="Models/tsmodel02.stan", 
@@ -206,6 +212,9 @@ plot_forecast=function(res=results022019_2,
                        v2="model",
                        v3="cluster",
                        sc=NULL){
+  # this code is a bit clumsy in joining data with results 
+  
+  #auxiliary data frames for data that don't have models with GTI  
   clusters_name=res[[2]] %>% filter(parameter=="phi2") %>%
     separate(GTI_lag,into = c("GTI_lag","cluster"),sep = "\\.") %>% 
     select(cluster) %>% unique()
@@ -218,19 +227,17 @@ plot_forecast=function(res=results022019_2,
   data_ips= data %>% 
     select(year,Raw_IPS)
   
-  
+#joining data and results  
   dat=res[[1]] %>% left_join(data_aux) %>%
     left_join(data_ips) %>%
     separate(GTI_lag,into = c("GTI_lag","cluster"),sep = "\\.") %>%
     left_join(temp, by="model") %>%
     unite(cluster,c("cluster.x","cluster.y"),sep="",na.rm=T) %>% 
-    # unite(model,c("model","GTI_lag"),sep=".",na.rm=T) %>%
     mutate(model=case_when(model=="ADL" ~ "ARX", 
                            model=="RWDL"~"RWX",TRUE ~ model) %>% as_factor(), 
            GTI_lag=replace_na(GTI_lag," "),
            GTI_lag=GTI_lag %>% str_replace("\\_","\\[") %>% str_c(ifelse(GTI_lag!=" ","]"," ")),
            GTI_lag=as_factor(GTI_lag)) %>%
-    # filter(GTI_lag=="GT_12.3"|is.na(GTI_lag)) %>%
     filter(GTI_lag%in%lags|model%in%c("AR","RW")) %>%
     filter(cluster%in%clusters,year<=year.f) 
   
@@ -265,9 +272,7 @@ plot_uncertainty= function(res=results022019_2,
   dat=res[[1]] %>% left_join(data) %>%
   separate(GTI_lag,into = c("GTI_lag","cluster"),sep = "\\.") %>%
   left_join(temp, by="model") %>%
-  unite(cluster,c("cluster.x","cluster.y"),sep="",na.rm=T) %>% 
-  # unite(model,c("model","GTI_lag"),sep=".",na.rm=T) %>%
-  mutate(model=case_when(model=="ADL" ~ "ARX", model=="RWDL"~"RWX",TRUE ~ model) %>% as_factor(), 
+  unite(cluster,c("cluster.x","cluster.y"),sep="",na.rm=T) %>%   mutate(model=case_when(model=="ADL" ~ "ARX", model=="RWDL"~"RWX",TRUE ~ model) %>% as_factor(), 
          GTI_lag=replace_na(GTI_lag," "),
          GTI_lag=GTI_lag %>% str_replace("\\_","\\[") %>% str_c(ifelse(GTI_lag!=" ","]"," ")),
          GTI_lag=as_factor(GTI_lag)) %>%
@@ -303,6 +308,7 @@ p=ggplot(data=dat) +
 return(p)
 }
 
+#old code for comparison only
 # GTI lagged over monthly data ####
 # forecasts_2019 <- function(data=data_mig){
 # 

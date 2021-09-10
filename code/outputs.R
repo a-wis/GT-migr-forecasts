@@ -24,9 +24,6 @@ pl.dat=  ggplot(pl.dati) +
   
   geom_vline(xintercept = 2016.475,colour="darkgrey",linetype="dashed") +
   geom_line(data=. %>% filter(cluster!="all"),aes(x=year,y=value,group=name,colour=cluster,linetype=cluster),size=1,alpha=0.3) +
-  # facet_wrap(year~.,nrow = 4) +
-  # geom_smooth(data=. %>% filter(cluster!="all"),aes(x=year,y=value,group=cluster,colour=cluster, fill=cluster,linetype=cluster),method="loess",size=1.5,alpha=0.3) +
-  # geom_smooth(aes(x=year,y=value,group=cluster,colour=cluster, linetype=cluster),method="loess",size=2.5,alpha=0.9,se=F) +
   scale_x_continuous(expand = c(0,0.2)) +
   scale_linetype_manual(values=c("solid","dashed", "twodash", "longdash", "1333", "6246" )) +
   geom_line(data=pl.datiav,aes(x=year,y=cluster_mean,colour=cluster,linetype=cluster), size=2) +
@@ -51,11 +48,6 @@ pl.lag=data_mig2 %>%
   mutate(lag=as_factor(lag), cluster=cluster %>% 
            as_factor() %>%
            fct_relevel("all","currency","education","employment","housing","control")) %>%
-  # rename(cluster.id=cluster) %>%
-  # mutate(cluster=case_when(cluster.id==GTIclust %>% filter(name=="X1.lira") %>% pull(cluster.id) ~ "currency I",
-  #                          cluster.id==GTIclust %>% filter(name=="ron.to.pound") %>% pull(cluster.id) ~ "currency II",
-  #                          cluster.id==GTIclust %>% filter(name=="jobs.uk") %>% pull(cluster.id) ~ "job|study",
-  #                          cluster.id=="all" ~ "all")) %>%
   filter(year>2012) %>%
   ggplot() +
   geom_line(aes(x = year, y = exp(value), colour=lag,group=(lag)), size = 1) +
@@ -230,37 +222,74 @@ ggexport(g3,filename= paste0("graphs/unc2013.pdf"),
 
 
 # plotting for Twitter
+#getting the errors
 err_18=pl2018_3$data %>% filter(error=="MAPE") %>% distinct() %>% group_by(cluster,model) %>% summarise(MAPE=mean(value)) %>%
   mutate(year=2018)
 
 err_19=pl2019_3$data %>% filter(error=="MAPE") %>% distinct() %>% group_by(cluster,model) %>% summarise(MAPE=mean(value)) %>%
   mutate(year=2019)
 
-err=bind_rows(err_18,err_19) %>%
-  mutate(model_type=case_when(
-    model == "AR" ~ "ART",
-    model == "ARX" ~ "ART",
-    model == "RW" ~ "RWT",
-    model == "RWX" ~ "RWT"
-  ))
 err_m=bind_rows(err_18,err_19) %>%
   mutate(model_type=case_when(
     model == "AR" ~ "benchmark",
-    model == "ARX" ~ "GT",
+    model == "ARX" ~ "GT predictor",
     model == "RW" ~ "benchmark",
-    model == "RWX" ~ "GT"
-  )) 
-%>%
-  group_by(model_type,cluster,year) %>%
-  summarise(MAPE=mean(MAPE))
+    model == "RWX" ~ "GT predictor"
+  ),
+  cluster=as_factor(cluster)) 
+  err_m = err_m %>%
+    mutate(cluster=cluster %>% 
+             fct_relevel("all", after=Inf) %>%
+             fct_recode(`all keywords`="all")) 
 
-ggplot(err ) +
-  geom_path(aes(x=model,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow()) +
-  facet_grid(.~cluster,space = "free_x")
+# ggplot(err ) +
+#   geom_path(aes(x=model,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow()) +
+#   facet_grid(.~cluster,space = "free_x")
 
-ggplot(err_m %>% filter(model%in%c("AR","ARX"))) +
-  geom_path(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow()) +
-  facet_grid(.~cluster,space = "free_x")
-ggplot(err_m %>% filter(model%in%c("RW","RWX"))) +
-  geom_path(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow()) +
-  facet_grid(.~cluster,space = "free_x")
+gtar=ggplot(err_m %>% filter(model%in%c("AR","ARX"))) +
+  geom_point(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),size=2) +
+  geom_path(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow(),size=1.1) +
+  facet_grid(.~cluster,space = "free_x") +
+  theme_bw() +
+  theme(axis.text.x = element_text(size=13,angle = 45, hjust = 1),
+        axis.title = element_text(size=12),
+        legend.text = element_text(size=14),
+        legend.title = element_text(size=14),
+        strip.text = element_text(size=12),
+        legend.position = "right",
+        legend.key.size = unit(c(1.1),units = "cm")
+  ) +
+  labs(title="Average reductions in forecast errors (MAPE) when predicting migration\nfrom Romania to the UK for 2018 and 2019",
+       subtitle = "Autoregressive models with predictors constructed with Google Trends (GT) keywords:",
+       y="Mean Absolute Percentage Error (in %)",
+       x="",
+       colour="Year") 
+
+ggsave(filename = "graphs/Social_Media_5282.png",device = "png",plot = gtar,width = 940,height=788,units = "px",dpi=120)
+
+gtrw=ggplot(err_m %>% filter(model%in%c("RW","RWX"))) +
+  geom_path(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow(),size=1.2) +
+  facet_grid(.~cluster,space = "free_x") +
+  theme_bw() +
+  theme(axis.text.x = element_text(size=13,angle = 45, hjust = 1),
+        axis.title = element_text(size=12),
+        legend.text = element_text(size=14),
+        legend.title = element_text(size=14),
+        strip.text = element_text(size=12),
+        legend.position = "right",
+        legend.key.size = unit(c(1.1),units = "cm")
+  ) +
+  labs(title="Average reductions in forecast errors (MAPE) when predicting migration\nfrom Romania to the UK for 2018 and 2019",
+       subtitle = "Random walk models with Google Trends (GT) predictors",
+       y="Mean Absolute Percentage Error (in %)",
+       x="",
+       colour="Year") 
+
+ggsave(filename = "graphs/RandomWalk.png",device = "png",plot = gtrw,width = 940,height=788,units = "px",dpi=120)
+
+
+# ggplot(err_m %>% filter(model%in%c("RW","RWX"))) +
+#   geom_path(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow()) +
+#   facet_grid(.~cluster,space = "free_x")
+
+### Google Trends data 

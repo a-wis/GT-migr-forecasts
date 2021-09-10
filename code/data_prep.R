@@ -74,13 +74,10 @@ GTIclust = GTIdetail %>%
   pivot_longer(cols = 2:60) %>% 
   pivot_wider(names_from = year, values_from=value) %>% 
   left_join(cluster_id) %>%
-  # rename(cluster_s=cluster) %>%
-  # left_join(GTIkm) %>%
   mutate(cluster=case_when(
     is.na(cluster) ~ "all",
     TRUE ~ cluster)
     ) #cluster=as.factor(cluster)
-# the above mutate() is the "original" coding (_2), in the new runs (_21, _22) clusters change, old 1 = new 3, and old 3 = new 1.
 
 
 #plotting clustered GTI values
