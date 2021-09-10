@@ -1,0 +1,117 @@
+1   GT-migr-forecasts                          
+2    ¦--code                                   
+3    ¦   ¦--analysis.R                         
+4    ¦   ¦--data_prep.R                        
+5    ¦   ¦--functions_modelling_plotting.R     
+6    ¦   ¦--info.md                            
+7    ¦   °--outputs.R                          
+8    ¦--data                                   
+9    ¦   ¦--GT_cluster_dictionary.csv          
+10   ¦   ¦--GT_data.csv                        
+11   ¦   °--IPS_data.xlsx                      
+12   ¦--graphs                                 
+13   ¦   ¦--corr.pdf                           
+14   ¦   ¦--GTI_forcast2018.pdf                
+15   ¦   ¦--GTI_forcast2019.pdf                
+16   ¦   ¦--GTI_lags.pdf                       
+17   ¦   ¦--GTI_Mig_ts.pdf                     
+18   ¦   ¦--RandomWalk.png                     
+19   ¦   ¦--results_err.pdf                    
+20   ¦   ¦--results_err_old.pdf                
+21   ¦   ¦--results_err_rob.pdf                
+22   ¦   ¦--Social_Media_5282.png              
+23   ¦   ¦--tweet_ar.png                       
+24   ¦   °--unc2013.pdf                        
+25   ¦--GT_data                                
+26   ¦   ¦--Control                            
+27   ¦   ¦   ¦--Control_Cluster.xlsx           
+28   ¦   ¦   ¦--Control_keywords.md            
+29   ¦   ¦   ¦--flower.csv                     
+30   ¦   ¦   ¦--grass.csv                      
+31   ¦   ¦   ¦--Greece.csv                     
+32   ¦   ¦   ¦--horse.csv                      
+33   ¦   ¦   ¦--money.csv                      
+34   ¦   ¦   ¦--mother.csv                     
+35   ¦   ¦   ¦--rocket.csv                     
+36   ¦   ¦   ¦--Spain.csv                      
+37   ¦   ¦   ¦--sport.csv                      
+38   ¦   ¦   °--tree.csv                       
+39   ¦   ¦--Education_Cluster                  
+40   ¦   ¦   ¦--Education_Cluster.csv          
+41   ¦   ¦   ¦--Education_keywords.md          
+42   ¦   ¦   ¦--education_uk.csv               
+43   ¦   ¦   ¦--school_England.csv             
+44   ¦   ¦   ¦--school_uk.csv                  
+45   ¦   ¦   ¦--student_uk.csv                 
+46   ¦   ¦   ¦--study_uk.csv                   
+47   ¦   ¦   °--Universities_uk.csv            
+48   ¦   ¦--Employment_Cluster                 
+49   ¦   ¦   ¦--Employment_Cluster.xlsx        
+50   ¦   ¦   ¦--Employment_keywords.md         
+51   ¦   ¦   ¦--jobs_England.csv               
+52   ¦   ¦   ¦--jobs_uk.csv                    
+53   ¦   ¦   ¦--locuri_de_munca_Anglia.csv     
+54   ¦   ¦   ¦--locuri_de_munca_uk.csv         
+55   ¦   ¦   ¦--munca_Anglia.csv               
+56   ¦   ¦   ¦--munca_uk.csv                   
+57   ¦   ¦   °--work_uk.csv                    
+58   ¦   ¦--GT Data Compendium                 
+59   ¦   ¦--Housing_Cluster                    
+60   ¦   ¦   ¦--casa_anglia.csv                
+61   ¦   ¦   ¦--casa_uk.csv                    
+62   ¦   ¦   ¦--house_england.csv              
+63   ¦   ¦   ¦--house_uk.csv                   
+64   ¦   ¦   ¦--Housing_Cluster.xlsx           
+65   ¦   ¦   ¦--Housing_keywords.md            
+66   ¦   ¦   ¦--rent_uk.csv                    
+67   ¦   ¦   °--residence_uk.csv               
+68   ¦   °--Pound_Cluster                      
+69   ¦       ¦--1_lira.csv                     
+70   ¦       ¦--1_pound.csv                    
+71   ¦       ¦--bani_anglia.csv                
+72   ¦       ¦--bani_uk.csv                    
+73   ¦       ¦--British_pound.csv              
+74   ¦       ¦--cat_e_lira.csv                 
+75   ¦       ¦--currency_uk.csv                
+76   ¦       ¦--curs_lira_sterlina.csv         
+77   ¦       ¦--curs_valutar_lira.csv          
+78   ¦       ¦--curs_valutar_lira_sterlina.csv 
+79   ¦       ¦--evolutie_curs_lira_sterlina.csv
+80   ¦       ¦--GBP_to_lei.csv                 
+81   ¦       ¦--GBP_to_ron.csv                 
+82   ¦       ¦--lei_to_GBP.csv                 
+83   ¦       ¦--lei_to_pound.csv               
+84   ¦       ¦--lira_sterlina.csv              
+85   ¦       ¦--money_uk.csv                   
+86   ¦       ¦--o_lira.csv                     
+87   ¦       ¦--one_pound.csv                  
+88   ¦       ¦--Pound_Cluster.xlsx             
+89   ¦       ¦--Pound_keywords.md              
+90   ¦       ¦--pound_sterling.csv             
+91   ¦       ¦--pound_to_lei.csv               
+92   ¦       ¦--pound_to_ron.csv               
+93   ¦       ¦--pret_lira.csv                  
+94   ¦       ¦--quid.csv                       
+95   ¦       ¦--ron_to_GBP.csv                 
+96   ¦       ¦--ron_to_pound.csv               
+97   ¦       ¦--salariu_anglia.csv             
+98   ¦       ¦--salariu_uk.csv                 
+99   ¦       °--salary_uk.csv                  
+100  ¦--LICENSE                                
+101  ¦--models                                 
+102  ¦   ¦--tsmodel011.rds                     
+103  ¦   ¦--tsmodel011.stan                    
+104  ¦   ¦--tsmodel011rw.rds                   
+105  ¦   ¦--tsmodel011rw.stan                  
+106  ¦   ¦--tsmodel021.rds                     
+107  ¦   ¦--tsmodel021.stan                    
+108  ¦   ¦--tsmodel021rw.rds                   
+109  ¦   °--tsmodel021rw.stan                  
+110  ¦--output                                 
+111  ¦   ¦--info.md                            
+112  ¦   ¦--results_30.RData                   
+113  ¦   ¦--results_31.RData                   
+114  ¦   ¦--results_32.RData                   
+115  ¦   ¦--results_all.RData                  
+116  ¦   °--results022018_30.RData             
+117  °--README.md                              

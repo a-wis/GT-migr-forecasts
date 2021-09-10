@@ -292,4 +292,7 @@ ggsave(filename = "graphs/RandomWalk.png",device = "png",plot = gtrw,width = 940
 #   geom_path(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow()) +
 #   facet_grid(.~cluster,space = "free_x")
 
-### Google Trends data 
+# ### folders structure
+# path=list.files(recursive = TRUE, include.dirs = TRUE) 
+# path=str_c("GT-migr-forecasts",path)
+# mytree <- data.tree::as.Node(data.frame(pathString = path))
