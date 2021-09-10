@@ -9,8 +9,8 @@ run.model.forecast <- function(model.file="Models/tsmodel02.stan",
                                trees=10,
                                model.name,GT.nam,
                                year.st=2013){
-  require(tidyverse)
-  require(rstan)
+  # require(tidyverse)
+  # require(rstan)
   
 #fitting
   start_time <- Sys.time()
@@ -136,8 +136,6 @@ forecasts_cl1 <- function(data=data_mig2,
 }
 
 #ploting errors####
-#REMEMBER check clusters oreder!!!
-#for _2 it is 1, 2, 3, for _21, _22 ir is 3, 2, 1
 plot_error = function(res=results022019,
                       input=data_mig2,
                       pl_fct=7,
@@ -200,7 +198,7 @@ plot_error = function(res=results022019,
 }
 
 plot_forecast=function(res=results022019_2,
-                       data=data_mig,
+                       data=data_mig2,
                        year.f=2019,
                        lags="GT[12]",
                        clusters=c("employment","education","currency","housing","control","all"),
@@ -212,14 +210,23 @@ plot_forecast=function(res=results022019_2,
     separate(GTI_lag,into = c("GTI_lag","cluster"),sep = "\\.") %>% 
     select(cluster) %>% unique()
   temp=expand_grid(model=c("AR","RW"),clusters_name)
+  temp_d=expand_grid(model=c("AR","RW","ADL","RWDL"), GTI_lag=data %>% select(GTI) %>% distinct() %>% pull(GTI))
+    
+  data_aux= data %>% 
+    select(year,GTI,value) %>%
+    rename(GTI_lag=GTI,GTI=value)  
+  data_ips= data %>% 
+    select(year,Raw_IPS)
   
   
-  dat=res[[1]] %>% left_join(data) %>%
+  dat=res[[1]] %>% left_join(data_aux) %>%
+    left_join(data_ips) %>%
     separate(GTI_lag,into = c("GTI_lag","cluster"),sep = "\\.") %>%
     left_join(temp, by="model") %>%
     unite(cluster,c("cluster.x","cluster.y"),sep="",na.rm=T) %>% 
     # unite(model,c("model","GTI_lag"),sep=".",na.rm=T) %>%
-    mutate(model=case_when(model=="ADL" ~ "ARX", model=="RWDL"~"RWX",TRUE ~ model) %>% as_factor(), 
+    mutate(model=case_when(model=="ADL" ~ "ARX", 
+                           model=="RWDL"~"RWX",TRUE ~ model) %>% as_factor(), 
            GTI_lag=replace_na(GTI_lag," "),
            GTI_lag=GTI_lag %>% str_replace("\\_","\\[") %>% str_c(ifelse(GTI_lag!=" ","]"," ")),
            GTI_lag=as_factor(GTI_lag)) %>%
@@ -228,12 +235,12 @@ plot_forecast=function(res=results022019_2,
     filter(cluster%in%clusters,year<=year.f) 
   
   p=ggplot(data=dat) +
+    geom_line(aes(x = year, y = exp(GTI)), size = 1, color = "red",linetype="dashed") +
     geom_line(aes(x = year, y = yhat),color = "#670878") + 
     geom_ribbon(aes(x = year, ymin = yhat_lower, ymax = yhat_upper), fill = "#855d8c", alpha = 0.3) + 
     geom_point(aes(x = year, y = ifelse(year==year.f,NA,exp(Raw_IPS))), size = 3, color = "#0062ff") +
     geom_point(aes(x = year, y = ifelse(year==year.f,exp(Raw_IPS),NA)), size = 3, color = "#0062ff", shape=17) +
     # geom_vline(aes(xintercept = year.f-.5), linetype="dashed",colour="grey") +
-    #geom_line(aes(x = year, y = exp(GTI_0)), size = 1.2, color = "red") 
     facet_grid(dat[[v1]]+dat[[v2]]~dat[[v3]],labeller = label_parsed) +
     scale_y_continuous(limits = if (is.null(sc)) NULL else c(NA,sc), oob=scales::squish) +
     theme_bw() + #GTI_lag+model~cluster
