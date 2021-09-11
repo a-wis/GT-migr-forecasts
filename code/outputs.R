@@ -236,16 +236,45 @@ err_m=bind_rows(err_18,err_19) %>%
     model == "RW" ~ "benchmark",
     model == "RWX" ~ "GT predictor"
   ),
+  model_specp=case_when(
+    model == "AR" ~ "AR/ARX",
+    model == "ARX" ~ "AR/ARX",
+    model == "RW" ~ "RW/RWX",
+    model == "RWX" ~ "RW/RWX"
+  ),
+  model_spec=case_when(
+    model == "AR" ~ "AR",
+    model == "ARX" ~ "AR",
+    model == "RW" ~ "RW",
+    model == "RWX" ~ "RW"
+  ),
   cluster=as_factor(cluster)) 
   err_m = err_m %>%
     mutate(cluster=cluster %>% 
              fct_relevel("all", after=Inf) %>%
              fct_recode(`all keywords`="all")) 
-
-# ggplot(err ) +
-#   geom_path(aes(x=model,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow()) +
-#   facet_grid(.~cluster,space = "free_x")
-
+#plots for paper 
+#Fig 6: average MAPE 
+  gparrw=ggplot(err_m ) +
+    geom_point(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),size=2) +
+    geom_path(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow(),size=1.1) +
+    facet_grid(model_specp~cluster,space = "free_x",scales = "free") +
+    theme_bw() +
+    theme(axis.text.x = element_text(size=13,angle = 45, hjust = 1),
+          axis.title = element_text(size=12),
+          legend.text = element_text(size=14),
+          legend.title = element_text(size=14),
+          strip.text = element_text(size=12),
+          legend.position = "right",
+          legend.key.size = unit(c(1.1),units = "cm")
+    ) +
+    labs(subtitle = "Sample starting 2013",
+         y="MAPE (%)",
+         x="Model",
+         colour="Year")
+  ggsave(filename = "graphs/err_average2013.pdf",device = "pdf",plot = gparrw,width = 9,height=7)  
+  
+#plots for Twitter
 gtar=ggplot(err_m %>% filter(model%in%c("AR","ARX"))) +
   geom_point(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),size=2) +
   geom_path(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow(),size=1.1) +
@@ -287,12 +316,31 @@ gtrw=ggplot(err_m %>% filter(model%in%c("RW","RWX"))) +
 
 ggsave(filename = "graphs/RandomWalk.png",device = "png",plot = gtrw,width = 940,height=788,units = "px",dpi=120)
 
+#RW and AR together
+gtarrw=ggplot(err_m) +
+  geom_point(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),size=2) +
+  geom_path(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow(),size=1.1) +
+  facet_grid(model_spec~cluster,space = "free_x") +
+  theme_bw() +
+  theme(axis.text.x = element_text(size=13,angle = 45, hjust = 1),
+        axis.title = element_text(size=12),
+        legend.text = element_text(size=14),
+        legend.title = element_text(size=14),
+        strip.text = element_text(size=12),
+        legend.position = "right",
+        legend.key.size = unit(c(1.1),units = "cm")
+  ) +
+  labs(title="Average reductions in forecast errors (MAPE) when predicting migration\nfrom Romania to the UK for 2018 and 2019",
+       subtitle = "Autoregressive (AR) and random walk (RW) models with predictors constructed with Google Trends (GT) keywords:",
+       y="Mean Absolute Percentage Error (in %)",
+       x="",
+       colour="Year") 
 
-# ggplot(err_m %>% filter(model%in%c("RW","RWX"))) +
-#   geom_path(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow()) +
-#   facet_grid(.~cluster,space = "free_x")
+ggsave(filename = "graphs/Social_Media_5282_A.png",device = "png",plot = gtarrw,width = 940,height=788,units = "px",dpi=110)
+
 
 # ### folders structure
+# library(data.tree)
 # path=list.files(recursive = TRUE, include.dirs = TRUE) 
 # path=str_c("GT-migr-forecasts",path)
 # mytree <- data.tree::as.Node(data.frame(pathString = path))
