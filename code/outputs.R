@@ -281,15 +281,17 @@ gtar=ggplot(err_m %>% filter(model%in%c("AR","ARX"))) +
   facet_grid(.~cluster,space = "free_x") +
   theme_bw() +
   theme(axis.text.x = element_text(size=13,angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(size=12, hjust = 0.5),
         axis.title = element_text(size=12),
         legend.text = element_text(size=14),
         legend.title = element_text(size=14),
         strip.text = element_text(size=12),
-        legend.position = "right",
+        legend.position = "bottom",
         legend.key.size = unit(c(1.1),units = "cm")
   ) +
-  labs(title="Average reductions in forecast errors (MAPE) when predicting migration\nfrom Romania to the UK for 2018 and 2019",
-       subtitle = "Autoregressive models with predictors constructed with Google Trends (GT) keywords:",
+  labs(title="Average reductions in forecast errors (MAPE) when predicting migration\nfrom Romania to the UK for 2018 and 2019\n",
+       subtitle = "Autoregressive models with predictors constructed by using Google Trends (GT) keywords:",
        y="Mean Absolute Percentage Error (in %)",
        x="Model",
        colour="Year") 
@@ -333,7 +335,7 @@ gtarrw=ggplot(err_m) +
         legend.key.size = unit(c(1.1),units = "cm")
   ) +
   labs(title="Average reductions in forecast errors (MAPE) when predicting migration\nfrom Romania to the UK for 2018 and 2019",
-       subtitle = "Autoregressive (AR) and random walk (RW) models with predictors constructed with Google Trends (GT) keywords:",
+       subtitle = "Autoregressive (AR) and random walk (RW) models with predictors constructed by using Google Trends (GT) keywords:",
        y="Mean Absolute Percentage Error (in %)",
        x="Model",
        colour="Year") 
@@ -343,6 +345,11 @@ ggsave(filename = "graphs/Social_Media_5282_A.png",device = "png",plot = gtarrw,
 
 # ### folders structure
 # library(data.tree)
-# path=list.files(recursive = TRUE, include.dirs = TRUE) 
-# path=str_c("GT-migr-forecasts",path)
+# path=list.files(recursive = TRUE, include.dirs = TRUE)
+# path=str_c("GT-migr-forecasts/",path)
 # mytree <- data.tree::as.Node(data.frame(pathString = path))
+# mytree=print(mytree,limit = 1000)
+# sink("folders.txt")
+# print(mytree,row.names = F)
+# sink()
+
