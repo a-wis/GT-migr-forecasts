@@ -291,7 +291,7 @@ gtar=ggplot(err_m %>% filter(model%in%c("AR","ARX"))) +
   labs(title="Average reductions in forecast errors (MAPE) when predicting migration\nfrom Romania to the UK for 2018 and 2019",
        subtitle = "Autoregressive models with predictors constructed with Google Trends (GT) keywords:",
        y="Mean Absolute Percentage Error (in %)",
-       x="",
+       x="Model",
        colour="Year") 
 
 ggsave(filename = "graphs/Social_Media_5282.png",device = "png",plot = gtar,width = 940,height=788,units = "px",dpi=120)
@@ -311,7 +311,7 @@ gtrw=ggplot(err_m %>% filter(model%in%c("RW","RWX"))) +
   labs(title="Average reductions in forecast errors (MAPE) when predicting migration\nfrom Romania to the UK for 2018 and 2019",
        subtitle = "Random walk models with Google Trends (GT) predictors",
        y="Mean Absolute Percentage Error (in %)",
-       x="",
+       x="Model",
        colour="Year") 
 
 ggsave(filename = "graphs/RandomWalk.png",device = "png",plot = gtrw,width = 940,height=788,units = "px",dpi=120)
@@ -320,7 +320,8 @@ ggsave(filename = "graphs/RandomWalk.png",device = "png",plot = gtrw,width = 940
 gtarrw=ggplot(err_m) +
   geom_point(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),size=2) +
   geom_path(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow(),size=1.1) +
-  facet_grid(model_spec~cluster,space = "free_x") +
+  facet_grid(model_spec~cluster,
+             space = "free_x",scales = "free_y") +
   theme_bw() +
   theme(axis.text.x = element_text(size=13,angle = 45, hjust = 1),
         axis.title = element_text(size=12),
@@ -333,7 +334,7 @@ gtarrw=ggplot(err_m) +
   labs(title="Average reductions in forecast errors (MAPE) when predicting migration\nfrom Romania to the UK for 2018 and 2019",
        subtitle = "Autoregressive (AR) and random walk (RW) models with predictors constructed with Google Trends (GT) keywords:",
        y="Mean Absolute Percentage Error (in %)",
-       x="",
+       x="Model",
        colour="Year") 
 
 ggsave(filename = "graphs/Social_Media_5282_A.png",device = "png",plot = gtarrw,width = 940,height=788,units = "px",dpi=110)
