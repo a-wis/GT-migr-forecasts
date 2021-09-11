@@ -319,16 +319,17 @@ ggsave(filename = "graphs/RandomWalk.png",device = "png",plot = gtrw,width = 940
 #RW and AR together
 gtarrw=ggplot(err_m) +
   geom_point(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),size=2) +
-  geom_path(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow(),size=1.1) +
+  geom_path(aes(x=model_type,y=MAPE,group=factor(year),colour=factor(year)),arrow = arrow(angle=25),size=1.1) +
   facet_grid(model_spec~cluster,
              space = "free_x",scales = "free_y") +
   theme_bw() +
   theme(axis.text.x = element_text(size=13,angle = 45, hjust = 1),
         axis.title = element_text(size=12),
+        plot.title = element_text(hjust = 0.5),
         legend.text = element_text(size=14),
         legend.title = element_text(size=14),
         strip.text = element_text(size=12),
-        legend.position = "right",
+        legend.position = "bottom",
         legend.key.size = unit(c(1.1),units = "cm")
   ) +
   labs(title="Average reductions in forecast errors (MAPE) when predicting migration\nfrom Romania to the UK for 2018 and 2019",
