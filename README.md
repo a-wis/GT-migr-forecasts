@@ -52,5 +52,5 @@ GT-migr-forecasts/
 |    └── results022018_30.RData  
 │
 ├── LICENSE                       
-└── README.md                     <- information about the repo
+└── README.md
 ```
