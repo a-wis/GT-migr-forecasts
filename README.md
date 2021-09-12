@@ -10,7 +10,9 @@ Andreea Avramescu<sup>1</sup>, [Arkadiusz Wiśniowski](https://www.research.manc
 
 <sup>*</sup> [Corresponding author](mailto:a.wisniowski@manchester.ac.uk)
 
+> ## Repository structure
 
+```
 GT-migr-forecasts/                        
 ├── Code                
 |   ├── analysis.R                            <- contains setting up of simulations and results saving, setting up data for output                             
@@ -47,3 +49,4 @@ GT-migr-forecasts/
 │
 ├── LICENSE                       <- files excluded from git version control 
 └── README.md                     <- information about the repo
+```
