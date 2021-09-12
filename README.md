@@ -1,13 +1,19 @@
-# Now-casting Romanian Migration into the United Kingdom by Using Google Search Engine Data
+# <p align="center"> Now-casting Romanian Migration into the United Kingdom by Using Google Search Engine Data </p>
+  
+### <p align="center">Andreea Avramescu<sup>1</sup>, [Arkadiusz Wiśniowski](https://www.research.manchester.ac.uk/portal/a.wisniowski.html)<sup>2*</sup>
+</p>
+  
+<p align="center">
+<sup>1</sup> Alliance Manchester Business School, University of Manchester, </br> Booth Street West, M15 6PB, Manchester, UK
+</p>
 
-Andreea Avramescu<sup>1</sup>, [Arkadiusz Wiśniowski](https://www.research.manchester.ac.uk/portal/a.wisniowski.html)<sup>2*</sup>
 
-<sup>1</sup> *Alliance Manchester Business School , University of Manchester*
-
-<sup>2</sup> *Department of Social Statistics, University of Manchester*
+<p align="center">
+<sup>2</sup> Department of Social Statistics, School of Social Sciences, University of Manchester,  </br> Oxford Road, M13 9PL, Manchester, UK
 
 <sup>*</sup> [Corresponding author](mailto:a.wisniowski@manchester.ac.uk)
-
+</p>
+  
 > ## Repository structure
 
 ```
