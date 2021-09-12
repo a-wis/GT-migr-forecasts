@@ -24,21 +24,21 @@ GT-migr-forecasts/
 |   ├── functions_modelling_plotting.R   <- includes functions for analysis and plotting that are sourced in `analysis.R`                            
 |   └── outputs.R                        <- contains code for producing all tables and figures presented in the manuscript  
 |
-├── Data                          <- all data used for the analysis in CSV and XLSX formats  
+├── Data                          <- all data used for the analysis in CSV or XLSX format  
 |    ├── GT_cluster_dictionary.csv              
 |    ├── GT_data                  <- the data used to create the Google Trends Index               
-|    |   ├── Control_Cluster.xlsx     
+|    |   ├── Control_Cluster.xlsx       
 |    |   ├── Education_Cluster.xlsx   
 |    |   ├── Employment_Cluster.xlsx       
 |    |   ├── Housing_Cluster.xlsx       
 |    |   ├── Pound_Cluster.xlsx 
 |    |   └── GT Data Compendium
-|    ├── GT_data.csv                            
-|    └── IPS_data.xlsx  
+|    ├── GT_data.csv              <- aggregated data of all keywords used to create the 5 GT clusters            
+|    └── IPS_data.xlsx            <- oficial statistics data between 2004 - 2019
 |
-├── Graphs                    
+├── Graphs                        <- all figures presented in the manuscript in PNG or PDF format                     
 |
-├── Models                  
+├── Models                        <- STAN code to build the Autoregressive and Random Walk models
 |    ├── tsmodel011.rds / stan                                              
 |    ├── tsmodel011rw.rds / stan                                            
 |    ├── tsmodel021.rds / stan                                             
