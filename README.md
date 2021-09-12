@@ -51,6 +51,6 @@ GT-migr-forecasts/
 |    ├── results_all.RData               <- simulations for all models and years for which forecasts were made            
 |    └── results022018_30.RData  
 │
-├── LICENSE                       <- files excluded from git version control 
+├── LICENSE                       
 └── README.md                     <- information about the repo
 ```
