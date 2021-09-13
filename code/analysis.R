@@ -14,25 +14,17 @@
 # library(tidyverse)
 # library(stargazer)
 
-#hue_pal()[n] useful for colours
-
-# tables for plotting clustered GTI values Fig 1####
-pl.dati=GTIclust %>% 
-  pivot_longer(cols = `2012`:`2019`,names_to="year") %>% 
-  mutate(year=as.numeric(year)) %>% 
-  right_join(data_mig) 
-pl.datiav=GTIclust %>% 
-  pivot_longer(cols = `2012`:`2019`,names_to="year") %>% 
-  mutate(year=as.numeric(year)) %>%
-  group_by(cluster,year) %>%
-  summarise(cluster_mean=mean(value)) %>% ungroup()
 
 
 
 #modelling relative standard errors ####
+#model with logs - not used
 # lm(formula = log(IPSSEpc/(1-IPSSEpc)) ~ (Raw_IPS), data = data_mig %>% filter(year>2000)) %>% summary()
+#Models in Table A4
+#Model(B)
 lm.mod=lm(formula = log(IPSSEpc/(1-IPSSEpc)) ~ (Raw_IPS)-1, 
           data = data_mig %>% filter(year>2000)) 
+#Model (A)
 lm.mod0=lm(formula = log(IPSSEpc/(1-IPSSEpc)) ~ (Raw_IPS), 
            data = data_mig %>% filter(year>2000)) 
 
@@ -86,5 +78,6 @@ results022018_32=forecasts_cl1(data=data_mig2 %>%
 save(results022018_32, results022019_32,
      file="output/results_32.RData")
 
-save(results022018_30, results022019_30, results022018_31, results022019_31, results022018_32, results022019_32,
-     file="output/results_all.RData")
+# to save all results of the simulation run the below
+# save(results022018_30, results022019_30, results022018_31, results022019_31, results022018_32, results022019_32,
+     # file="output/results_all.RData")

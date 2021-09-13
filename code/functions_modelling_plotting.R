@@ -156,9 +156,11 @@ plot_error = function(res=results022019,
   
   res.sum = res[[1]] %>% 
     left_join(input %>% pivot_wider(names_from="GTI",values_from="value")) %>%
+    #MASE is not used in the manuscript but can be calculated with small modifications to this code
     mutate(ME=exp(Raw_IPS)-yhat,  MAPE=abs(exp(Raw_IPS)-yhat)/exp(Raw_IPS),
            MASE=abs(exp(Raw_IPS)-yhat)/abs(exp(Raw_IPS)-exp(lagIPS))) %>% #RMSE=sqrt((exp(Raw_IPS)-yhat)^2), = ME
     filter(year==year.f) %>%
+    # need to select MASE here if using
     dplyr::select(Raw_IPS,year,model, GTI_lag, ME, MAPE) 
   
   res.phi = res[[2]] %>% filter(parameter=="phi2") %>%
@@ -170,6 +172,7 @@ plot_error = function(res=results022019,
   
   p= res.sum %>% 
     mutate(MAPE=MAPE*100) %>%
+    # need to select MASE here if using
     pivot_longer(cols = ME:MAPE, names_to=c("error")) %>%
     separate(GTI_lag,into = c("GTI_lag","cluster"),sep = "\\.") %>%
     left_join(temp, by="model") %>%
@@ -235,8 +238,8 @@ plot_forecast=function(res=results022019_2,
     unite(cluster,c("cluster.x","cluster.y"),sep="",na.rm=T) %>% 
     mutate(model=case_when(model=="ADL" ~ "ARX", 
                            model=="RWDL"~"RWX",TRUE ~ model) %>% as_factor(), 
-           GTI_lag=replace_na(GTI_lag," "),
-           GTI_lag=GTI_lag %>% str_replace("\\_","\\[") %>% str_c(ifelse(GTI_lag!=" ","]"," ")),
+           GTI_lag=replace_na(GTI_lag,"benchmark"),
+           GTI_lag=GTI_lag %>% str_replace("\\_","\\[") %>% str_c(ifelse(GTI_lag!="benchmark","]","")),
            GTI_lag=as_factor(GTI_lag)) %>%
     filter(GTI_lag%in%lags|model%in%c("AR","RW")) %>%
     filter(cluster%in%clusters,year<=year.f) 

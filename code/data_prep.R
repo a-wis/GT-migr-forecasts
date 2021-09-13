@@ -47,14 +47,14 @@ GTIdetail=data %>%
   summarise_at(vars(evolutie.curs.lira.sterlina:GTI), mean) %>%
   ungroup() 
 
-#clustering GTI data annually averaged ####
+#clustering GTI data annually averaged ###
 #clustering using raw GTI data
-x1=GTIdetail %>% 
-  select(-GTI,-c(50:60)) %>% 
-  pivot_longer(cols = 2:49) %>% 
-  pivot_wider(names_from = year, values_from=value) %>% 
-  column_to_rownames(var = "name")  %>% 
-  as.matrix()
+# x1=GTIdetail %>% 
+#   select(-GTI,-c(50:60)) %>% 
+#   pivot_longer(cols = 2:49) %>% 
+#   pivot_wider(names_from = year, values_from=value) %>% 
+#   column_to_rownames(var = "name")  %>% 
+#   as.matrix()
 
 # clustering using k-means - from earlier version - not published
 #testing scree and silhouette for optimum number of clusters
@@ -67,7 +67,7 @@ x1=GTIdetail %>%
   # rownames_to_column(var = "name") %>% 
   # rename(cluster=`GTIkm$cluster`)
 
-
+# defining clusters ####
 #GTIclust is a key between cluster.id and cluster (name)
 GTIclust = GTIdetail %>% 
   # select(-GTI) %>% 
@@ -102,6 +102,7 @@ GTIclust = GTIdetail %>%
 
 
 # GTI averages with monthly windows ####
+#used in plotting
 GTIm_av=data %>% 
   select(Date, GTI,year, month) %>%
   mutate(GTI_0=(GTI), 
@@ -122,6 +123,7 @@ GTIm_av=data %>%
   summarise_at(vars(GTI_0:GTI_12), mean) %>%
   ungroup()
 
+#annual averages of GTI used in simulations and plotting
 GTIm=data %>% 
   pivot_longer(cols = evolutie.curs.lira.sterlina:GTI,names_to = "GTname") %>%
   group_by(GTname) %>%
@@ -184,7 +186,16 @@ data_mig2 = data_an %>%
   mutate(GTI_diff=value-lag(value)) %>% 
   ungroup()
 
-
+# tables for plotting clustered GTI values Fig 1####
+pl.dati=GTIclust %>% 
+  pivot_longer(cols = `2012`:`2019`,names_to="year") %>% 
+  mutate(year=as.numeric(year)) %>% 
+  right_join(data_mig) 
+pl.datiav=GTIclust %>% 
+  pivot_longer(cols = `2012`:`2019`,names_to="year") %>% 
+  mutate(year=as.numeric(year)) %>%
+  group_by(cluster,year) %>%
+  summarise(cluster_mean=mean(value)) %>% ungroup()
 
 
 

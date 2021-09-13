@@ -4,7 +4,7 @@
 ## plotting and tables with results
 ############################################
 ## created: 09/09/2021
-## modified: 09/09/2021
+## modified: 13/09/2021
 ############################################
 ## Arkadiusz Wisniowski
 ############################################
@@ -13,6 +13,14 @@
 ##### libraries ####
 library(tidyverse)
 library(stargazer)
+#hue_pal()[n] useful for colours
+
+# README ####
+# the commands here reproduce all plots and tables in the manuscript. Before running commands in here, all data need to be read in (data_prep.R), analysis carried out (analysis.R) and some wrapper functions for plotting read in (functions_modelling_plotting.R). If only the results need to be analysed, the data and results can be read in using the following:
+# source("code/data_prep.R")
+# load("output/results_all.RData")
+
+
 
 
 # Figure 1: trends ####
@@ -37,7 +45,7 @@ pl.dat=  ggplot(pl.dati) +
         legend.position = "right",
         legend.key.size = unit(c(1.1),units = "cm")
   ) +
-  labs(y="value (Google Trend Index | immigration in 1,000 persons)") +
+  labs(y="Value (Google Trend Index | immigration in 1,000 persons)", x="Year") +
   scale_shape_discrete(name="") 
 pl.dat
 ggsave(filename = "graphs/GTI_Mig_ts.pdf",device = "pdf",plot = pl.dat,width = 10,height=5.5)
@@ -52,7 +60,7 @@ pl.lag=data_mig2 %>%
   ggplot() +
   geom_line(aes(x = year, y = exp(value), colour=lag,group=(lag)), size = 1) +
   scale_color_viridis_d(option="inferno",end = 0.9) +
-  geom_point(aes(x = year, y = exp(Raw_IPS)), size = 4, color = "blue") + 
+  geom_point(aes(x = year, y = exp(Raw_IPS), shape="immigration"), size = 4, color = "blue") + 
   scale_linetype_manual(values=c("solid","dashed", "twodash", "longdash","1333", "6246" )) +
   facet_grid(.~cluster) +
   theme_bw() +
@@ -64,9 +72,9 @@ pl.lag=data_mig2 %>%
         strip.text = element_text(size=12)
         # legend.key.size = unit(c(.9),units = "cm")
   ) +
-  labs(y="value (Google Trend Index | immigration in 1,000 persons)")
+  labs(y="value (Google Trend Index | immigration in 1,000 persons)", shape="")
 pl.lag  
-#ggsave(filename = "graphs/GTI_lags.pdf",device = "pdf",plot = pl.lag,width = 12, height=5)
+ggsave(filename = "graphs/GTI_lags.pdf",device = "pdf",plot = pl.lag,width = 12, height=5)
 
 
 
@@ -91,11 +99,13 @@ corr=GTIdetail %>%
   mutate(IPS=exp(Raw_IPS)) %>%
   select(-year,-IPSSE,-IPSSEpc,-IPSCI,-Date) %>% 
   cor()
-write.table(corr[,c(60,74)],file="clipboard")
+#to see results in e.g. Excel
+# write.table(corr[,c(60,74)],file="clipboard")
 # correlation with Raw IPS and logIPS
 foo=corr[,c(60,74)]
 #t-test for correlation at 0.05 level
-write.table(abs(foo/sqrt(1-foo^2)*sqrt(5))>qt(0.95,df = 5),file="clipboard")
+# to see t-test in Excel
+# write.table(abs(foo/sqrt(1-foo^2)*sqrt(5))>qt(0.95,df = 5),file="clipboard")
 
 #logIPS as used in the models
 corr1=as.data.frame(corr[,74]) %>%
@@ -111,12 +121,14 @@ corr2=data_mig2 %>%
   pivot_wider(names_from = GTI, values_from=value) %>% 
   select(-year) %>%
   cor()
-write.table(corr2[,c(1,2)],file="clipboard")
+#copy to clipboard
+# write.table(corr2[,c(1,2)],file="clipboard")
 
 #value of rho above which it is significant at 0.05
 qt(0.95,df = 5)/sqrt(5+qt(0.95,df = 5)^2)
 
 #PAPER table A2 with key words####
+#needs minor adjustments in LaTeX
 GTIclust %>% 
   mutate(keyword=str_replace_all(name,"[.]"," ")) %>%
   select(-name) %>%
@@ -162,6 +174,7 @@ ggsave(filename = "Graphs/IPS_rse.pdf",device = "pdf",plot = pl.ipsse,width = 8,
 
 
 # table A4 ####
+# requires running Models A and B in output.R
 stargazer(lm.mod0,lm.mod,
           type="latex", 
           style = "default",
@@ -171,14 +184,16 @@ stargazer(lm.mod0,lm.mod,
 
 # making a plot of errors ####
 ## plot of errors Fig 3 and A2####
+#this and further plots require sourcing functions_modelling_plotting.R
+# source("code/functions_modelling_plotting.R")
 pl2018_3=plot_error(res = results022018_30,pl_fct = 35,year.f = 2018, label = ", sample starting 2013")
 pl2019_3=plot_error(res = results022019_30,pl_fct = 6,year.f = 2019, label = ", sample starting 2013",y.lab=F)
 pl2018_31=plot_error(res = results022018_31,pl_fct = 35,year.f = 2018, label = ", sample with 2012 data")
 pl2019_31=plot_error(res = results022019_31,pl_fct = 6,year.f = 2019, label = ", sample with 2012 data",y.lab=F)
 pl2018_32=plot_error(res = results022018_32,pl_fct = 35,year.f = 2018, label = ", differences of the GTI used as predictor")
 pl2019_32=plot_error(res = results022019_32,pl_fct = 6,year.f = 2019, label = ", differences of the GTI used as predictor",y.lab=F)
-pl2018_2
-pl2019_2
+pl2018_3
+pl2019_3
 
 g=ggarrange(plotlist=list(pl2018_3,pl2019_3), ncol=1,nrow=2, labels = NULL, legend ="right", common.legend = TRUE)
 g1=ggarrange(plotlist=list(pl2018_31,pl2019_31,pl2018_32,pl2019_32), ncol=2,nrow=2, labels = NULL, legend ="bottom", common.legend = TRUE, widths=c(1.05,1))
@@ -203,10 +218,14 @@ pl2018_3$data %>% filter(cluster=="employment",error=="MAPE", model%in%c("RW","R
 pl.2018=plot_forecast(res = results022018_30,lags = c("GT[4]","GT[12]"), year.f=2018, clusters=c("education","employment"),v1="GTI_lag",v2="model",v3="cluster",sc=150)
 pl.2019=plot_forecast(res = results022019_30,year.f=2019)
 
+#for the presentations
+# pl.2018a=plot_forecast(res = results022018_30, lags = c("GT[6]"),year.f=2018)
+# ggsave(filename = "Graphs/GTI_forcast2018a.pdf",device = "pdf",plot = pl.2018a,width = 12,height=7)
+
 pl.2018
 pl.2019
 
-ggsave(filename = "Graphs/GTI_forcast2018.pdf",device = "pdf",plot = pl.2018,width = 6,height=7)
+ggsave(filename = "Graphs/GTI_forcast2018.pdf",device = "pdf",plot = pl.2018,width = 6.5,height=7.5)
 ggsave(filename = "Graphs/GTI_forcast2019.pdf",device = "pdf",plot = pl.2019,width = 12,height=7)
 
 
@@ -273,6 +292,8 @@ err_m=bind_rows(err_18,err_19) %>%
          x="Model",
          colour="Year")
   ggsave(filename = "graphs/err_average2013.pdf",device = "pdf",plot = gparrw,width = 9,height=7)  
+  # ggsave(filename = "graphs/err_average2013s.pdf",device = "pdf",plot = gparrw,width = 9,height=6)
+  
   
 #plots for Twitter
 gtar=ggplot(err_m %>% filter(model%in%c("AR","ARX"))) +
