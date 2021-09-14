@@ -256,7 +256,7 @@ plot_forecast=function(res=results022019_2,
     theme_bw() + #GTI_lag+model~cluster
     theme(axis.text.x = element_text(angle=90,vjust = 0.5),
           strip.text = element_text(size=13)) +
-    labs(title=paste("Forecasts for ",year.f),y="1,000 persons")
+    labs(title=paste("Forecasts for ",year.f),y="1,000 persons | Google Trends Index value")
   
   return(p)
 }

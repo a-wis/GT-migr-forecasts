@@ -199,6 +199,9 @@ g=ggarrange(plotlist=list(pl2018_3,pl2019_3), ncol=1,nrow=2, labels = NULL, lege
 g1=ggarrange(plotlist=list(pl2018_31,pl2019_31,pl2018_32,pl2019_32), ncol=2,nrow=2, labels = NULL, legend ="bottom", common.legend = TRUE, widths=c(1.05,1))
 g2=ggarrange(plotlist=list(pl2018_3,pl2019_3,pl2018_31,pl2019_31,pl2018_32,pl2019_32), ncol=2,nrow=3, labels = NULL, legend ="bottom", common.legend = TRUE, widths=c(1.05,1))
 
+#for the presentation
+# ggsave(filename = "Graphs/err_2019a.pdf",device = "pdf",plot = pl2019_3,width = 14,height=6.5)
+
 #Fig A2 ####
 ggexport(g1,filename= paste0("graphs/results_err_rob.pdf"),
          width=13,height = 13)
@@ -220,7 +223,8 @@ pl.2019=plot_forecast(res = results022019_30,year.f=2019)
 
 #for the presentations
 # pl.2018a=plot_forecast(res = results022018_30, lags = c("GT[6]"),year.f=2018)
-# ggsave(filename = "Graphs/GTI_forcast2018a.pdf",device = "pdf",plot = pl.2018a,width = 12,height=7)
+# ggsave(filename = "Graphs/GTI_forcast2018a.pdf",device = "pdf",plot = pl.2018a,width = 14,height=6.5)
+# ggsave(filename = "Graphs/GTI_forcast2019a.pdf",device = "pdf",plot = pl.2019,width = 14,height=6.5)
 
 pl.2018
 pl.2019
@@ -292,7 +296,7 @@ err_m=bind_rows(err_18,err_19) %>%
          x="Model",
          colour="Year")
   ggsave(filename = "graphs/err_average2013.pdf",device = "pdf",plot = gparrw,width = 9,height=7)  
-  # ggsave(filename = "graphs/err_average2013s.pdf",device = "pdf",plot = gparrw,width = 9,height=6)
+  # ggsave(filename = "graphs/err_average2013s.pdf",device = "pdf",plot = gparrw,width = 13,height=6)
   
   
 #plots for Twitter
