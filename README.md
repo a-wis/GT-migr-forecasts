@@ -14,6 +14,8 @@
 <sup>*</sup> [Corresponding author](mailto:a.wisniowski@manchester.ac.uk)
 </p>
   
+[![DOI](https://zenodo.org/badge/368348270.svg)](https://zenodo.org/badge/latestdoi/368348270)
+
 > ## Repository structure
 
 ```
