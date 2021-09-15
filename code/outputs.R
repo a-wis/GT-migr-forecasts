@@ -16,9 +16,13 @@ library(stargazer)
 #hue_pal()[n] useful for colours
 
 # README ####
-# the commands here reproduce all plots and tables in the manuscript. Before running commands in here, all data need to be read in (data_prep.R), analysis carried out (analysis.R) and some wrapper functions for plotting read in (functions_modelling_plotting.R). If only the results need to be analysed, the data and results can be read in using the following:
-# source("code/data_prep.R")
+# the commands here reproduce all plots and tables in the manuscript. Before running commands in here, all data need to be read in (data_prep.R), analysis carried out (analysis.R) and some wrapper functions for plotting read in (functions_modelling_plotting.R). 
+#This function loads the data
+source("code/data_prep.R")
+#If only the results need to be analysed, the results can be read in using the following:
 # load("output/results_all.RData")
+#If the simulation is to be run, then use 
+# source("code/analysis.R")
 
 
 

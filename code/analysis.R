@@ -15,8 +15,6 @@
 # library(stargazer)
 
 
-
-
 #modelling relative standard errors ####
 #model with logs - not used
 # lm(formula = log(IPSSEpc/(1-IPSSEpc)) ~ (Raw_IPS), data = data_mig %>% filter(year>2000)) %>% summary()
@@ -30,16 +28,31 @@ lm.mod0=lm(formula = log(IPSSEpc/(1-IPSSEpc)) ~ (Raw_IPS),
 
 
 
+#### simulation ####
+
+# README (important): ####
+# The simulations were run in R 3.6.3 and rstan (Version 2.21.2, GitRev: 2e1f913d3ca3). Sometimes the simulation crashed RStudio with a cpp-related error (unreadable due to RStudio crash). To avoid that, the code generates compiled models in .rds files with rstan_options(auto_write = TRUE) option loaded. Alternatively, simulations can be run without pre-compiling  but crashes may occur. After generating rds files, the simulation can be run without issues. 
+#If the simulations/rstan do not work, it might be because of conflicts with newer versions of package withr: rstan Version 2.21.2 does not work if withr>2.2.0 is loaded. This should not be a problem when using rstan 2.26:  
+#https://discourse.mc-stan.org/t/new-error-cleanup-makevar-old-argument-rmu-is-missing-with-no-default/18137/75
 
 
-#### #simulation ####
-#reading in functions
-source("code/functions_modelling_plotting.R")
-#simulation
-# NOTE (important):
-# The simulations were run in R 3.6.3 and rstan (Version 2.21.2, GitRev: 2e1f913d3ca3). Sometimes the simulation crashed RStudio with a cpp-related error (unreadable due to RStudio crash). To avoid that, I suggest running the simulation with rstan_options(auto_write = TRUE) option firstly only to generate .rds files (compiled models). After generating rds files, the simulation will likely crash. Then, the simulation can be re-run without any issues. 
 library(rstan)
 library(rstantools)
+
+# compiling models to avoid crashing of the simulation
+# warning: the below commands stan_model may not work in rstan 2.21.2 when withr >2.2.0:
+rstan_options(auto_write = TRUE)
+
+stan_model(file = "models/tsmodel011.stan")
+stan_model(file = "models/tsmodel021.stan")
+stan_model(file = "models/tsmodel011rw.stan")
+stan_model(file = "models/tsmodel021rw.stan")
+##################################################
+
+
+#reading in functions
+source("code/functions_modelling_plotting.R")
+
 #data starting 2013: practically 2014 because of a lag
 results022019_30=forecasts_cl1(data=data_mig2,
                                year.st=2012,
