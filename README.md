@@ -23,7 +23,8 @@ GT-migr-forecasts/
 ├── Code                          <- R the code used for the analysis          
 |   ├── analysis.R                       <- contains setting up of simulations and results saving, setting up data for output                             
 |   ├── data_prep.R                      <- reads in, cleans and prepares data for analysis, also includes plots                            
-|   ├── functions_modelling_plotting.R   <- includes functions for analysis and plotting that are sourced in `analysis.R`                            
+|   ├── functions_modelling_plotting.R   <- includes functions for analysis and plotting that are sourced in `analysis.R`  
+|   ├── google_trends_data.R             <- example code to download the Google Trends data using the gtrendsR package
 |   └── outputs.R                        <- contains code for producing all tables and figures presented in the manuscript  
 |
 ├── Data                          <- all data used for the analysis in CSV or XLSX format  
