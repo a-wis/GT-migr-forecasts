@@ -16,6 +16,11 @@
   
 [![DOI](https://zenodo.org/badge/368348270.svg)](https://zenodo.org/badge/latestdoi/368348270)
 
+The repository contains data and code for reproducing results of the analysis. The file that 
+loads data and performs analysis (or loads results) is `output.R`. The simulation is performed 
+using `analysis.R`. The simulation uses rstan package. Before running the simulation, please 
+read a "readme" note in the `analysis.R` file on package versions and potential issues.
+
 > ## Repository structure
 
 ```
