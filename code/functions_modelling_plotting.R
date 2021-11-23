@@ -147,7 +147,8 @@ plot_error = function(res=results022019,
                       pl_fct=7,
                       year.f=2019,
                       label="",
-                      y.lab=T){
+                      y.labL=T,
+                      y.labR=T){
   clusters_name=res[[2]] %>% filter(parameter=="phi2") %>%
     separate(GTI_lag,into = c("GTI_lag","cluster"),sep = "\\.") %>% 
     select(cluster) %>% unique()
@@ -198,10 +199,10 @@ plot_error = function(res=results022019,
           legend.text = element_text(size=14),
           legend.title = element_text(size=14),
           legend.position = "right",
-          axis.title.y = if (y.lab==F) element_blank() else element_text(size=12)
-    ) +
+          axis.title.y.left = if (y.labL==F) element_blank() else element_text(size=12),
+          axis.title.y.right = if (y.labR==F) element_blank() else element_text(size=12)) +
     labs(linetype="95% CI", fill="95% CI", x="GTI monthly lag",
-         y="1,000s persons (ME) or % (MAPE)", #(MASE x 100)
+         y="1,000 persons (ME) or % (MAPE)", #(MASE x 100)
          title = paste0("Forecast for ",year.f,label))
   return(p)
 }
@@ -305,7 +306,7 @@ p=ggplot(data=dat) +
         axis.title.y = element_text(size=12) #if (y.lab==F) element_blank() else
   ) +
   labs(x="GTI monthly lag",
-       y="1,000s persons",
+       y="1,000 persons",
        title = paste0("Forecast for ",year.f,label))
 
 return(p)
