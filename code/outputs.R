@@ -189,7 +189,7 @@ stargazer(lm.mod0,lm.mod,
 # making a plot of errors ####
 ## plot of errors Fig 3 and A2####
 #this and further plots require sourcing functions_modelling_plotting.R
-# source("code/functions_modelling_plotting.R")
+source("code/functions_modelling_plotting.R")
 pl2018_3=plot_error(res = results022018_30,pl_fct = 35,year.f = 2018, label = "; sample starting 2013")
 pl2019_3=plot_error(res = results022019_30,pl_fct = 6,year.f = 2019, label = "; sample starting 2013",y.labL=F,y.labR = T)
 pl2018_31=plot_error(res = results022018_31,pl_fct = 35,year.f = 2018, label = "; sample with 2012 data",y.labL=T,y.labR = F)
@@ -245,7 +245,7 @@ pl.unc.2019= plot_uncertainty(res = results022019_30,year.f = 2019, label = "; s
 # Fig A5 ####
 g3=ggarrange(plotlist=list(pl.unc.2018,pl.unc.2019), ncol=1,nrow=2, labels = NULL, legend ="bottom", common.legend = TRUE)
 ggexport(g3,filename= paste0("graphs/unc2013.pdf"),
-         width=10,height = 11)
+         width=11,height = 12.5)
 
 
 # plotting for Twitter
